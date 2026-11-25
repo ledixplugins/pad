@@ -103,26 +103,35 @@
 </section>
 
 <!-- FX -->
-<section id="tab-fx" class="tab">
+<section id="tab-fx" class="tab" data-sv="mix">
   <div class="stseg" id="stSeg" role="tablist">
-    <button data-sv="kb" class="on" role="tab">Teclado</button>
-    <button data-sv="fx" role="tab">Efeitos</button>
+    <button data-sv="mix" class="on" role="tab">Mixer</button>
+    <button data-sv="kb" role="tab">Teclado</button>
+    <button data-sv="fx" role="tab">FX dos pads</button>
   </div>
 
-  <div id="stKb" class="stview">
-    <div class="console">
-      <div class="timbre">
-        <button id="stPrev" title="Timbre anterior" aria-label="Timbre anterior">◀</button>
-        <div class="tname"><small>Timbre</small><b id="stName">Piano elétrico</b><select id="stTimbre" aria-label="Timbre"></select></div>
-        <button id="stNext" title="Próximo timbre" aria-label="Próximo timbre">▶</button>
-      </div>
-      <div class="octs"><small>Oitava</small>
-        <div class="oct"><button id="stOctDn" aria-label="Oitava abaixo">−</button><b id="stOctV">C3</b><button id="stOctUp" aria-label="Oitava acima">+</button></div>
-      </div>
-      <button id="stSus" class="toggle sus">Sustain</button>
-      <label class="stsl"><span>Volume <output id="stVolO"></output></span><input type="range" id="stVol" min="0" max="1" step="0.01"></label>
-      <label class="stsl"><span>Reverb <output id="stRevO"></output></span><input type="range" id="stRev" min="0" max="1" step="0.01"></label>
+  <div class="stbar1">
+    <div class="tg"><small>Transpor</small><div class="oct"><button id="stTrDn" data-id="trans:-" aria-label="Transpor para baixo">−</button><b id="stTrV">0</b><button id="stTrUp" data-id="trans:+" aria-label="Transpor para cima">+</button></div></div>
+    <div class="bar setbar"><span class="lbl">Set</span>
+      <button id="stSetPrev" data-id="set:-" title="Set anterior" aria-label="Set anterior">◀</button>
+      <select id="stSet" aria-label="Set"></select>
+      <button id="stSetNext" data-id="set:+" title="Próximo set" aria-label="Próximo set">▶</button>
     </div>
+    <div class="tg"><small>Oitava</small><div class="oct"><button id="stOcDn" data-id="oct:-" aria-label="Oitava abaixo">−</button><b id="stOcV">0</b><button id="stOcUp" data-id="oct:+" aria-label="Oitava acima">+</button></div></div>
+  </div>
+  <div class="stbar2">
+    <button id="stSave" data-id="save" class="mixonly">Salvar</button>
+    <button id="stOver" data-id="over" class="mixonly">Sobrescrever</button>
+    <button id="stDel" class="mixonly danger">Excluir</button>
+    <span class="sp"></span>
+    <button id="stSus" data-id="sus" class="toggle">Sustain</button>
+    <button id="stLearn" class="toggle">Vincular MIDI</button>
+    <button id="stUnmap" class="mixonly">Limpar vínculos</button>
+  </div>
+
+  <div id="stMix" class="stview"><div id="stMixer" class="mixer"></div></div>
+
+  <div id="stKb" class="stview" hidden>
     <div class="board">
       <div class="wheels">
         <div class="whc"><div class="wh" id="whPitch"><div class="roll"></div><div class="notch"></div></div><small>Pitch</small></div>
