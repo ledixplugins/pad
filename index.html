@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aura Pad">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="style.css">
+<title>Aura Pad</title>
+</head>
+<body>
+
+<div id="start" class="overlay">
+  <div class="start-card">
+    <div class="logo">AURA<span>PAD</span></div>
+    <p>Pads infinitos, drum pads e metrônomo para ao vivo.</p>
+    <button id="btnStart" class="big primary">Tocar para iniciar o áudio</button>
+    <small id="startMsg">Carregando catálogo…</small>
+  </div>
+</div>
+
+<header>
+  <div class="logo small">AURA<span>PAD</span></div>
+  <div class="song-now" id="songNow">—</div>
+  <div class="hdr-right">
+    <label class="mini">Master <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.9"></label>
+    <button id="btnPanic" class="danger" title="Parar tudo">■ Parar</button>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="pads" class="on">Pads</button>
+  <button data-tab="drums">Drums</button>
+  <button data-tab="fx">StageLab / FX</button>
+  <button data-tab="metro">Metrônomo</button>
+  <button data-tab="setlist">Setlist</button>
+  <button data-tab="midi">MIDI</button>
+</nav>
+
+<main>
+
+<!-- PADS -->
+<section id="tab-pads" class="tab on">
+  <div class="row between">
+    <h2>Pad infinito</h2>
+    <div class="row gap">
+      <button id="padToggle" data-action="pad:toggle" class="primary">▶ Tocar</button>
+    </div>
+  </div>
+  <div id="keys" class="keys"></div>
+  <div class="row gap wrap sliders">
+    <label>Volume <input type="range" id="padVol" min="0" max="1" step="0.01" value="0.8"></label>
+    <label>Troca de tom <output id="padFadeO">4 s</output><input type="range" id="padFade" min="0.5" max="12" step="0.5" value="4"></label>
+    <label>Emenda do loop <output id="padLoopO">5 s</output><input type="range" id="padLoop" min="2" max="10" step="0.5" value="5"></label>
+  </div>
+  <div id="famCats" class="chips"></div>
+  <div id="fams" class="fams"></div>
+</section>
+
+<!-- DRUMS -->
+<section id="tab-drums" class="tab">
+  <div class="row between wrap gap">
+    <h2>Drum pads</h2>
+    <div class="row gap wrap">
+      <button id="drumEdit" class="toggle">✎ Editar pads</button>
+      <label class="mini">Volume <input type="range" id="drumVol" min="0" max="1" step="0.01" value="0.9"></label>
+    </div>
+  </div>
+  <div id="drumGrid" class="drum-grid"></div>
+  <div class="card">
+    <div class="row gap wrap">
+      <select id="setSel"></select>
+      <button id="setLoad">Carregar</button>
+      <button id="setDel" class="danger">Excluir</button>
+      <span class="sp"></span>
+      <input id="setName" placeholder="Nome do set" maxlength="40">
+      <button id="setSave" class="primary">Salvar set</button>
+    </div>
+    <div class="row gap wrap" style="margin-top:8px">
+      <label class="filebtn">Importar samples <input type="file" id="sampleFiles" accept="audio/*" multiple hidden></label>
+      <button id="setExport">Exportar sets</button>
+      <label class="filebtn">Importar sets <input type="file" id="setImport" accept="application/json" hidden></label>
+      <small id="drumMsg"></small>
+    </div>
+  </div>
+</section>
+
+<!-- FX -->
+<section id="tab-fx" class="tab">
+  <h2>Efeitos dos pads (tempo real)</h2>
+  <div class="card fxgrid">
+    <label>Cutoff <output id="fxCutO"></output><input type="range" id="fxCut" min="0" max="1" step="0.001" value="1"></label>
+    <label>Pan <output id="fxPanO"></output><input type="range" id="fxPan" min="-1" max="1" step="0.01" value="0"></label>
+    <label>Graves <output id="fxLowO"></output><input type="range" id="fxLow" min="-12" max="12" step="0.5" value="0"></label>
+    <label>Agudos <output id="fxHighO"></output><input type="range" id="fxHigh" min="-12" max="12" step="0.5" value="0"></label>
+    <label>Reverb <output id="fxRevO"></output><input type="range" id="fxRev" min="0" max="1" step="0.01" value="0.25"></label>
+  </div>
+  <div class="card">
+    <div class="row gap wrap">
+      <button id="fxComp" class="toggle">Compressor</button>
+      <label>Threshold <output id="fxThO"></output><input type="range" id="fxTh" min="-50" max="0" step="1" value="-24"></label>
+      <label>Ratio <output id="fxRaO"></output><input type="range" id="fxRa" min="1.5" max="12" step="0.5" value="4"></label>
+      <button id="fxReset">Zerar efeitos</button>
+    </div>
+  </div>
+  <div class="card soon">
+    <h3>Teclado / timbres (SF2, pianos, strings, synths, bells)</h3>
+    <p>Em desenvolvimento. Esta aba vai receber o leitor de timbres assim que você me enviar os arquivos SF2 que quer usar.</p>
+  </div>
+  <div class="card">
+    <h3>Uso offline</h3>
+    <p class="muted">Baixa todos os sons para o aparelho, para tocar sem internet (uns 170 MB).</p>
+    <div class="row gap"><button id="btnOffline">Baixar tudo para offline</button><progress id="offProg" value="0" max="1" hidden></progress><small id="offMsg"></small></div>
+  </div>
+</section>
+
+<!-- METRONOMO -->
+<section id="tab-metro" class="tab">
+  <div class="row between"><h2>Metrônomo</h2>
+    <button id="metToggle" data-action="met:toggle" class="primary">▶ Iniciar</button></div>
+  <div class="bpm-box">
+    <button id="bpmMinus" class="round">−</button>
+    <div class="bpm"><input id="bpm" type="number" min="30" max="260" value="72"><small>BPM</small></div>
+    <button id="bpmPlus" class="round">+</button>
+    <button id="tap" data-action="met:tap" class="tap">TAP</button>
+  </div>
+  <input type="range" id="bpmRange" min="30" max="260" step="1" value="72" class="wide">
+  <div id="beats" class="beats"></div>
+  <div class="card fxgrid">
+    <label>Compasso
+      <select id="metSig"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="6">6/8</option></select></label>
+    <label>Som <select id="metSound"></select></label>
+    <label>Volume <input type="range" id="metVol" min="0" max="1" step="0.01" value="0.7"></label>
+    <label class="check"><input type="checkbox" id="metAccent" checked> Acento no 1</label>
+  </div>
+</section>
+
+<!-- SETLIST -->
+<section id="tab-setlist" class="tab">
+  <div class="row between wrap gap"><h2>Setlist</h2>
+    <div class="row gap wrap">
+      <button data-action="song:prev">◀ Anterior</button>
+      <button data-action="song:next">Próxima ▶</button>
+    </div></div>
+  <div class="card">
+    <div class="row gap wrap">
+      <input id="songTitle" placeholder="Título da música" maxlength="60" class="grow">
+      <button id="songAdd" class="primary">+ Salvar estado atual</button>
+    </div>
+    <small class="muted">Guarda o tom, a família de pad e o andamento que estão ativos agora.</small>
+  </div>
+  <ol id="songs" class="songs"></ol>
+  <div class="row gap wrap">
+    <button id="slExport">Exportar setlist</button>
+    <label class="filebtn">Importar setlist <input type="file" id="slImport" accept="application/json" hidden></label>
+  </div>
+</section>
+
+<!-- MIDI -->
+<section id="tab-midi" class="tab">
+  <h2>Controle MIDI</h2>
+  <div class="card">
+    <div id="midiStatus">Verificando MIDI…</div>
+    <small class="muted">Funciona com controladores USB e Bluetooth MIDI quando o navegador oferece Web MIDI (Chrome/Edge no computador e no Android). O Safari do iPad não oferece Web MIDI.</small>
+  </div>
+  <div class="card">
+    <div class="row gap wrap">
+      <button id="midiLearn" class="toggle">Mapear controles</button>
+      <button id="midiReset">Restaurar padrão</button>
+      <small id="midiHint" class="muted">Ative, toque num botão do app e depois numa tecla/pad do controlador.</small>
+    </div>
+    <p class="muted" style="margin:10px 0 0">Padrão: notas 36–51 tocam os 16 drum pads; notas 60–71 trocam o tom do pad (C a B).</p>
+    <div id="midiMap" class="midimap"></div>
+  </div>
+</section>
+
+</main>
+
+<div id="modal" class="overlay hidden">
+  <div class="modal-card">
+    <div class="row between"><h3 id="modalTitle">Escolher som</h3><button id="modalClose">Fechar</button></div>
+    <div id="modalCats" class="chips"></div>
+    <div id="modalList" class="list"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
