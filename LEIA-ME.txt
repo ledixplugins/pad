@@ -1,0 +1,7 @@
+AURA PAD - teste local
+1) Descompacte esta pasta (de preferência em Documentos).
+2) Dê dois cliques em "Abrir Aura Pad.command".
+   Se o Mac avisar de desenvolvedor desconhecido: clique com o botão direito > Abrir > Abrir.
+3) O navegador abre em http://localhost:8123/ . Toque em "Tocar para iniciar o áudio".
+Para parar: feche a janela do Terminal.
+Use Chrome ou Edge no Mac (têm Web MIDI para o teclado/controladora).
