@@ -239,8 +239,10 @@ function renderPadBtn() {
   var b = $('#padToggle'); b.textContent = padOn ? '■ Parar' : '▶ Tocar'; b.classList.toggle('on', padOn);
 }
 var famCat = null;
+var byName = function (a, b) { return String(a.name || a).localeCompare(String(b.name || b), 'pt-BR', { numeric: true, sensitivity: 'base' }); };
 function renderFams() {
   var cats = []; CAT.pads.forEach(function (f) { if (cats.indexOf(f.category) < 0) cats.push(f.category); });
+  cats.sort(byName);
   if (!famCat) famCat = FAM[S.family] ? FAM[S.family].category : cats[0];
   var cb = $('#famCats'); cb.innerHTML = '';
   ['Todos'].concat(cats).forEach(function (c) {
@@ -249,7 +251,7 @@ function renderFams() {
     cb.appendChild(b);
   });
   var fb = $('#fams'); fb.innerHTML = '';
-  CAT.pads.filter(function (f) { return famCat === 'Todos' || f.category === famCat; }).forEach(function (f) {
+  CAT.pads.filter(function (f) { return famCat === 'Todos' || f.category === famCat; }).sort(byName).forEach(function (f) {
     var b = el('button', 'fam' + (f.id === S.family ? ' on' : ''), f.name);
     b.appendChild(el('small', null, f.category));
     b.onclick = function () { setFamily(f.id); };
@@ -337,7 +339,7 @@ function renderPicker() {
   var cb = $('#modalCats'); cb.innerHTML = '';
   cats.forEach(function (c) { var b = el('button', c === pickCat ? 'on' : '', c); b.onclick = function () { pickCat = c; renderPicker(); }; cb.appendChild(b); });
   var list = $('#modalList'); list.innerHTML = '';
-  var items = pickCat === 'Meus samples' ? Object.keys(userSamples).map(function (k) { return userSamples[k]; }) : CAT.drums.filter(function (d) { return d.category === pickCat; });
+  var items = pickCat === 'Meus samples' ? Object.keys(userSamples).map(function (k) { return userSamples[k]; }) : CAT.drums.filter(function (d) { return d.category === pickCat; }).sort(byName);
   if (!items.length) list.appendChild(el('p', 'muted', pickCat === 'Meus samples' ? 'Nenhum sample importado ainda. Use "Importar samples" na aba Drums.' : 'Vazio.'));
   items.forEach(function (it) {
     var row = el('div', 'item'); row.appendChild(el('span', 'nm', it.name));
