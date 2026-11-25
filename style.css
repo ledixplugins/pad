@@ -117,7 +117,7 @@ output{color:var(--txt);float:right;font-variant-numeric:tabular-nums}
 .key.live{background:linear-gradient(160deg,#8af0d8,var(--mint) 55%,#3cc5a6);color:#00130e;box-shadow:0 0 0 0 transparent,0 10px 40px rgba(102,224,196,.45)}
 .key.loading::after{content:"";position:absolute;right:10px;top:10px;width:8px;height:8px;border-radius:50%;background:var(--amber);animation:pulse 1s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.25}}
-@media(min-width:700px){.keys{grid-template-columns:repeat(12,minmax(0,1fr))}.key{height:100px}}
+@media(min-width:1100px){body:not(.live) .keys{grid-template-columns:repeat(12,minmax(0,1fr))}body:not(.live) .key{height:100px}}
 
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chips button{border-radius:999px;padding:7px 16px;min-height:36px;font-size:14px;background:var(--s1)}
@@ -129,7 +129,8 @@ output{color:var(--txt);float:right;font-variant-numeric:tabular-nums}
 .fam small{display:block;font-weight:400;margin-top:2px}
 
 /* ---------- drums ---------- */
-.kitbar{display:flex;gap:8px;align-items:center;margin:0 0 12px}
+.kitbar{display:flex;gap:10px;align-items:center}
+.tab>.kitbar{margin-top:16px}
 .kitbar select{flex:1;min-width:0;font-size:17px;font-weight:600;padding:12px 40px 12px 16px;border-radius:999px;text-align:left}
 .kitbar button{min-width:48px;width:48px;height:48px;padding:0;border-radius:50%;font-size:14px}
 .drum-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -192,11 +193,11 @@ body.live main>.tab{margin:0}
 body.live #tab-drums>.card,body.live .sliders{display:none}
 body.live #tab-pads .fams{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
 body.live h2{font-size:22px}
+body.live .key{height:76px}
 @media(min-width:900px){
   body.live main{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
   body.live .keys{grid-template-columns:repeat(4,minmax(0,1fr))}
   body.live .key{height:88px}
-  body.live .dpad{min-height:88px}
 }
 @media(max-width:600px){
   h2{font-size:24px}main{padding:14px 14px calc(40px + var(--safe-b))}header{padding-left:14px;padding-right:14px}nav{margin-left:10px}
@@ -206,3 +207,38 @@ body.live h2{font-size:22px}
 body.live main>.tab{min-width:0}
 #btnPanic{white-space:nowrap}
 @media(max-width:600px){.key{height:68px;font-size:20px}.mini input{width:70px}.hdr-right{gap:8px}header{gap:10px}}
+
+/* escala única: título 28/22, rótulo 13, texto 16, botão pequeno 14 */
+.tab>.row.between{min-height:48px;gap:14px;flex-wrap:wrap}
+.tab>.row.between>.row{gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.tab>.row.between h2{white-space:nowrap}
+#drumEdit{min-height:38px;padding:8px 16px;font-size:14px}
+#padToggle,#metToggle{min-height:44px;padding:10px 22px;white-space:nowrap}
+.mini{white-space:nowrap}
+.mini input{width:110px}
+.dpad{font-size:14px;gap:6px}
+.dpad b{font-size:12px}
+.key{font-size:22px}
+.fam{font-size:16px}
+.fam small{font-size:12px}
+.chips button{font-size:14px;white-space:nowrap}
+@media(max-width:600px){
+  .mini{font-size:12px}.mini input{width:72px}
+  .logo.small{font-size:17px}
+  .song-now{display:none}
+  header{justify-content:space-between}
+  .key{height:64px;font-size:19px}
+  body.live .key{height:64px}
+  .dpad{font-size:13px;padding:6px}
+  .tab>.row.between{min-height:44px}
+}
+/* botões de arquivo iguais aos demais */
+.card .filebtn,.filebtn{font-size:16px;color:var(--txt);flex:none;min-width:0;flex-direction:row;gap:0}
+.card .row.gap>button,.card .row.gap>.filebtn{flex:none}
+.card .row.gap>input.grow{flex:1 1 180px}
+.dpad span{text-wrap:balance}
+@media(max-width:600px){
+  .dpad{aspect-ratio:1/1;font-size:12.5px;padding:4px}
+  .dpad b{font-size:11px}
+  .card{padding:14px}
+}
