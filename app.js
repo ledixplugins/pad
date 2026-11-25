@@ -9,6 +9,15 @@ var DEFAULT_KIT = ['kick-kit-3','snare-kit-3','clap-1-kit-1','hihat-kit-3',
                    'hihat-open-kit-3','tom-1-kit-3','tom-2-kit-3','tom-3-kit-3',
                    'sub-kick-kit-1','crash-kit-3','shaker-2','tamb-2',
                    'snap-1','wood-1','boom-kit-2','swell-kit-2'];
+var FACTORY_KITS = [
+  { name: 'Worship (padrão)', ids: DEFAULT_KIT },
+  { name: 'Kit suave', ids: ['kick-1-kit-1','snare-1','clap-1-kit-1','hihat-kit-3','hihat-open-kit-3','tom-1-kit-1','tom-2-kit-1','tom-3-kit-1','sub-kick-kit-1','crash-kit-3','shaker-3','tamb-3','snap-2','wood-1-kit-1','boom-kit-2','swell-kit-2'] },
+  { name: 'Kit toms graves', ids: ['kick-kit-3','snare-3','clap-2','hihat-kit-3','hihat-open-kit-3','tom-1-kit-2','tom-2-kit-2','tom-3-kit-2','sub-1','crash-kit-3','shaker-4','tamb-4','snap-3-fx','wood-2','boom-1-fx','swell-drums-fx'] },
+  { name: 'Kit FX moderno', ids: ['sub-kick-fxkit-4','snare-fx-2','clap-4-fx','hihat-kit-3','hihat-open-kit-3','tumb-fxkit-4','perc-fxkit-4','blop-fxkit-4','sub-2','crash-kit-3','noise-fxkit-4','shaker-fx-13','snap-4-fx','wood-fxkit-4','boom-fxkit-4','swell-fxkit-4'] },
+  { name: 'Eletrônico 808/909', ids: ['kick-808-6','snare-5','clap-3','hihat-kit-3','hihat-open-kit-3','kick-909-9','kick-2-808-7','kick-2-909-10','sub-1','crash-kit-3','shaker-5','tamb-5','snap-1','wood-3','kick-fx-14','reverse-cymbal-6'] },
+  { name: 'Percussão', ids: ['kick-2','wood-block-9','clap-6','shaker-2','shaker-long-16','tumb-1-kit-1','tumb-2-kit-2','tumb-fxkit-4','sub-1','chimes-bell-5','shaker-egg-1','tamb-2','snap-1','wood-1','tamb-long-1','tamb-shake-9'] },
+  { name: 'Efeitos e atmosfera', ids: ['boom-cinematic','boom-2-fx','impact-fx-worship','whoosh-impact','whoosh-boom-rise','rise-reverse-symbal','reverse-worship','reverse-cymbal-7','swell-drums-fx','swell-kit-2','explosion-fx-worship','pressure-boom-worship','long-boom','chimes-bell-5','efx-chimes-4','2-white-noise-kit-2'] },
+];
 var STORE = 'aurapad.v1';
 
 function $(s, r) { return (r || document).querySelector(s); }
@@ -21,7 +30,7 @@ var DEF = {
   family: 'shimmer', key: 'C', padVol: 0.8, padFade: 4, padLoop: 5, drumVol: 0.9, masterVol: 0.9,
   fx: { cut: 1, pan: 0, low: 0, high: 0, rev: 0.25, comp: false, th: -24, ra: 4 },
   bpm: 72, sig: 4, click: 'classic', metVol: 0.7, accent: true,
-  kit: DEFAULT_KIT.slice(), drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
+  kit: DEFAULT_KIT.slice(), kitSel: 'f:Worship (padrão)', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
 };
 var S = (function () {
   var s = {};
@@ -288,8 +297,37 @@ function renderDrums() {
     g.appendChild(p);
   });
   $('#tab-drums').classList.toggle('editing', drumEditing);
-  var sel = $('#setSel'); sel.innerHTML = '';
-  Object.keys(S.drumSets).forEach(function (n) { var o = el('option', null, n); o.value = n; sel.appendChild(o); });
+  var sel = $('#kitSel'); sel.innerHTML = '';
+  var g1 = document.createElement('optgroup'); g1.label = 'Kits prontos';
+  FACTORY_KITS.forEach(function (k) { var o = el('option', null, k.name); o.value = 'f:' + k.name; g1.appendChild(o); });
+  sel.appendChild(g1);
+  var us = Object.keys(S.drumSets);
+  if (us.length) {
+    var g2 = document.createElement('optgroup'); g2.label = 'Meus kits';
+    us.forEach(function (n) { var o = el('option', null, n); o.value = 'u:' + n; g2.appendChild(o); });
+    sel.appendChild(g2);
+  }
+  var cur = kitList().indexOf(S.kitSel) >= 0 ? S.kitSel : '';
+  sel.value = cur;
+  if (!cur) { var o0 = el('option', null, 'Personalizado'); o0.value = ''; sel.insertBefore(o0, sel.firstChild); sel.value = ''; }
+}
+function kitList() {
+  return FACTORY_KITS.map(function (k) { return 'f:' + k.name; }).concat(Object.keys(S.drumSets).map(function (n) { return 'u:' + n; }));
+}
+function kitIds(v) {
+  var n = v.slice(2), arr = null;
+  if (v[0] === 'f') FACTORY_KITS.forEach(function (k) { if (k.name === n) arr = k.ids; });
+  else arr = S.drumSets[n];
+  return arr ? arr.map(function (id, i) { return drumMeta(id) ? id : DEFAULT_KIT[i]; }) : null;
+}
+function applyKit(v, quiet) {
+  var ids = kitIds(v); if (!ids || ids.length !== 16) return;
+  S.kit = ids.slice(); S.kitSel = v; save(); renderDrums(); preloadKit();
+  if (!quiet) toast(v.slice(2));
+}
+function kitStep(d) {
+  var l = kitList(), i = l.indexOf(S.kitSel); if (i < 0) i = d > 0 ? -1 : l.length;
+  applyKit(l[(i + d + l.length) % l.length]);
 }
 
 /* seletor de samples */
@@ -310,7 +348,7 @@ function renderPicker() {
     var row = el('div', 'item'); row.appendChild(el('span', 'nm', it.name));
     var pv = el('button', null, '▶'); pv.onclick = function () { preview(it.id); };
     var use = el('button', 'primary', 'Usar'); use.onclick = function () {
-      S.kit[pickTarget] = it.id; save(); getDrumBuffer(it.id); renderDrums(); $('#modal').classList.add('hidden');
+      S.kit[pickTarget] = it.id; S.kitSel = ''; save(); getDrumBuffer(it.id); renderDrums(); $('#modal').classList.add('hidden');
     };
     row.appendChild(pv); row.appendChild(use);
     if (pickCat === 'Meus samples') { var del = el('button', 'danger', '🗑'); del.onclick = function () { removeUserSample(it.id); }; row.appendChild(del); }
@@ -493,6 +531,7 @@ function moveSong(i, d) {
 function loadSong(i) {
   var s = S.setlist[i]; if (!s) return;
   S.songIdx = i; S.key = s.key; if (FAM[s.family]) S.family = s.family;
+  if (s.kit && kitList().indexOf(s.kit) >= 0 && s.kit !== S.kitSel) applyKit(s.kit, true);
   setBpm(s.bpm); save();
   renderKeys(); renderFams(); renderSongs(); renderSongNow();
   if (padOn && ctx) padStart();
@@ -506,7 +545,7 @@ function songStep(d) {
 function bindSetlist() {
   $('#songAdd').onclick = function () {
     var t = $('#songTitle').value.trim() || ('Música ' + (S.setlist.length + 1));
-    S.setlist.push({ title: t.slice(0, 60), key: S.key, family: S.family, bpm: S.bpm });
+    S.setlist.push({ title: t.slice(0, 60), key: S.key, family: S.family, bpm: S.bpm, kit: S.kitSel });
     $('#songTitle').value = ''; save(); renderSongs(); toast('Música salva');
   };
   $('#slExport').onclick = function () { download('aurapad-setlist.json', JSON.stringify({ setlist: S.setlist }, null, 1)); };
@@ -514,7 +553,7 @@ function bindSetlist() {
     var f = e.target.files[0]; if (!f) return;
     f.text().then(function (t) {
       var j = JSON.parse(t); if (!Array.isArray(j.setlist)) throw 0;
-      S.setlist = j.setlist.map(function (s) { return { title: String(s.title || '').slice(0, 60), key: NOTES.indexOf(s.key) >= 0 ? s.key : 'C', family: s.family, bpm: clamp(parseInt(s.bpm, 10) || 72, 30, 260) }; });
+      S.setlist = j.setlist.map(function (s) { return { title: String(s.title || '').slice(0, 60), key: NOTES.indexOf(s.key) >= 0 ? s.key : 'C', family: s.family, bpm: clamp(parseInt(s.bpm, 10) || 72, 30, 260), kit: typeof s.kit === 'string' ? s.kit : '' }; });
       S.songIdx = -1; save(); renderSongs(); renderSongNow(); toast('Setlist importada');
     }).catch(function () { toast('Arquivo inválido'); }); e.target.value = '';
   };
@@ -527,14 +566,14 @@ function download(name, text) {
 /* ---------- sets de drum ---------- */
 function bindSets() {
   $('#setSave').onclick = function () {
-    var n = $('#setName').value.trim(); if (!n) { toast('Dê um nome ao set'); return; }
-    S.drumSets[n] = S.kit.slice(); save(); renderDrums(); $('#setSel').value = n; $('#setName').value = ''; toast('Set salvo');
+    var n = $('#setName').value.trim(); if (!n) { toast('Dê um nome ao kit'); return; }
+    S.drumSets[n] = S.kit.slice(); S.kitSel = 'u:' + n; save(); renderDrums(); $('#setName').value = ''; toast('Kit salvo');
   };
-  $('#setLoad').onclick = function () {
-    var n = $('#setSel').value; if (!n || !S.drumSets[n]) return;
-    S.kit = S.drumSets[n].map(function (id, i) { return drumMeta(id) ? id : DEFAULT_KIT[i]; }); save(); renderDrums(); preloadKit(); toast('Set carregado');
+  $('#kitSel').onchange = function () { if (this.value) applyKit(this.value); };
+  $('#setDel').onclick = function () {
+    var v = S.kitSel; if (!v || v[0] !== 'u') { toast('Selecione um kit seu para excluir'); return; }
+    var n = v.slice(2); if (confirm('Excluir o kit "' + n + '"?')) { delete S.drumSets[n]; S.kitSel = ''; save(); renderDrums(); }
   };
-  $('#setDel').onclick = function () { var n = $('#setSel').value; if (n && confirm('Excluir o set "' + n + '"?')) { delete S.drumSets[n]; save(); renderDrums(); } };
   $('#setExport').onclick = function () { download('aurapad-sets.json', JSON.stringify({ drumSets: S.drumSets }, null, 1)); };
   $('#setImport').onchange = function (e) {
     var f = e.target.files[0]; if (!f) return;
@@ -559,12 +598,14 @@ function doAction(a, vel) {
   else if (a === 'met:tap') tapTempo();
   else if (a === 'song:next') songStep(1);
   else if (a === 'song:prev') songStep(-1);
+  else if (a === 'kit:next') kitStep(1);
+  else if (a === 'kit:prev') kitStep(-1);
 }
 function actionName(a) {
   var p = a.split(':');
   if (p[0] === 'drum') return 'Drum pad ' + (parseInt(p[1], 10) + 1);
   if (p[0] === 'padkey') return 'Pad tom ' + LABEL[p[1]];
-  return { 'pad:toggle': 'Pad tocar/parar', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior' }[a] || a;
+  return { 'pad:toggle': 'Pad tocar/parar', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior' }[a] || a;
 }
 
 /* ---------- MIDI ---------- */

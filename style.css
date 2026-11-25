@@ -104,3 +104,7 @@ body.learn [data-action]{outline:2px dashed var(--acc2);outline-offset:2px}
 progress{width:140px}
 #toast{position:fixed;left:50%;bottom:calc(20px + var(--safe-b));transform:translateX(-50%);background:#000c;border:1px solid var(--line);padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;max-width:90%}
 #toast.show{opacity:1}
+
+.kitbar{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+.kitbar select{flex:1;min-width:0;font-size:1.05rem;padding:12px}
+.kitbar button{min-width:52px;padding:12px;font-size:1.1rem}

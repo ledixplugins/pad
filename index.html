@@ -72,15 +72,18 @@
       <label class="mini">Volume <input type="range" id="drumVol" min="0" max="1" step="0.01" value="0.9"></label>
     </div>
   </div>
+  <div class="kitbar">
+    <button id="kitPrev" data-action="kit:prev" title="Kit anterior">◀</button>
+    <select id="kitSel" aria-label="Kit de bateria"></select>
+    <button id="kitNext" data-action="kit:next" title="Próximo kit">▶</button>
+  </div>
   <div id="drumGrid" class="drum-grid"></div>
   <div class="card">
     <div class="row gap wrap">
-      <select id="setSel"></select>
-      <button id="setLoad">Carregar</button>
-      <button id="setDel" class="danger">Excluir</button>
+      <button id="setDel" class="danger">Excluir kit salvo</button>
       <span class="sp"></span>
-      <input id="setName" placeholder="Nome do set" maxlength="40">
-      <button id="setSave" class="primary">Salvar set</button>
+      <input id="setName" placeholder="Nome do seu kit" maxlength="40">
+      <button id="setSave" class="primary">Salvar kit atual</button>
     </div>
     <div class="row gap wrap" style="margin-top:8px">
       <label class="filebtn">Importar samples <input type="file" id="sampleFiles" accept="audio/*" multiple hidden></label>
