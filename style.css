@@ -242,49 +242,97 @@ body.learn [data-action]{outline:2px dashed var(--amber);outline-offset:3px}
 .dv .dvt b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dv .dvt output{float:none;color:var(--muted);font-size:13px}
 
-/* ---------- Palco: tudo numa tela, como um painel de palco ---------- */
-body.live main{display:grid;max-width:1500px;gap:14px 18px;grid-template-columns:minmax(0,1fr);
+/* ---------- Palco: painel que se ajusta à tela, sem rolagem ---------- */
+html:has(body.live),body.live{height:100%;overflow:hidden}
+body.live{display:flex;flex-direction:column;height:100vh;height:100dvh;min-height:0}
+body.live header,body.live nav{flex:none}
+body.live nav{position:relative;top:auto}
+body.live main{flex:1;min-height:0;width:100%;max-width:none;margin:0;padding:10px 16px calc(12px + var(--safe-b));
+  display:grid;gap:10px 14px;grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto auto minmax(0,1fr) minmax(0,1.5fr) auto auto;
   grid-template-areas:"padbar" "kitbar" "keys" "drums" "status" "vols"}
 body.live .tab.on{display:contents}
 body.live .tab.on>*{margin:0}
 body.live .tab>.row.between,body.live .sliders,body.live #famCats,body.live #fams,body.live #tab-drums>.card:not(.dvols),body.live #tab-pads>.card{display:none}
 body.live .padbar{display:flex;grid-area:padbar}
-body.live .kitbar{grid-area:kitbar;margin-top:0}
-body.live #keys{grid-area:keys}
-body.live #drumGrid{grid-area:drums}
+body.live .kitbar{grid-area:kitbar}
+body.live #keys{grid-area:keys;min-height:0}
+body.live #drumGrid{grid-area:drums;min-height:0}
 body.live .status{display:grid;grid-area:status}
 body.live .dvols{grid-area:vols}
 body.live .dvols.hidden{display:none!important}
 body.live .padbar,body.live .kitbar{background:var(--s1);padding:8px 12px;border-radius:var(--r-md)}
-body.live .keys{grid-template-columns:repeat(6,minmax(0,1fr))}
-body.live .key{height:70px}
+body.live .keys{grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);height:100%}
+body.live .key{height:auto;min-height:0;font-size:clamp(17px,3vh,28px)}
+body.live .drum-grid{grid-auto-rows:minmax(0,1fr);height:100%}
+body.live #drumGrid:not(.has16){grid-template-rows:repeat(2,minmax(0,1fr))}
+body.live #drumGrid.has16{grid-template-rows:repeat(4,minmax(0,1fr))}
 body.live #drumGrid:not(.has16) .dpad:nth-child(n+9){display:none}
-body.live .dpad{aspect-ratio:auto;min-height:92px;align-items:flex-start;justify-content:flex-start;text-align:left;padding:12px 14px;font-size:15px;font-weight:600}
+body.live .dpad{aspect-ratio:auto;min-height:0;overflow:hidden;align-items:flex-start;justify-content:flex-start;text-align:left;padding:clamp(8px,1.6vh,14px);font-size:clamp(12px,1.5vw + .5vh,16px);font-weight:600}
 body.live .dpad b{font-weight:500}
 body.live .dpad span{text-wrap:wrap}
 body.live .dpad.hit{transform:scale(.98)}
 
-.status{background:var(--s1);border-radius:var(--r-md);padding:16px 18px;grid-template-columns:1fr auto;grid-template-areas:"lb btn" "key btn" "pad pad" "kit kit";gap:2px 14px;align-items:center}
+.status{background:var(--s1);border-radius:var(--r-md);padding:14px 18px;grid-template-columns:1fr auto;grid-template-areas:"lb btn" "key btn" "pad pad" "kit kit";gap:0 14px;align-items:center}
 .status small{grid-area:lb;font-size:13px}
-.status .stkey{grid-area:key;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
-.status .stline{font-size:14px;color:var(--muted)}
-.status #stPad{grid-area:pad;margin-top:8px}.status #stKit{grid-area:kit}
-.status .stop{grid-area:btn;width:64px;height:64px;min-height:64px;border-radius:50%;padding:0;font-size:22px;background:var(--mint);color:#00130e}
+.status .stkey{grid-area:key;font-size:38px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.status .stline{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status #stPad{grid-area:pad;margin-top:6px}.status #stKit{grid-area:kit}
+.status .stop{grid-area:btn;width:60px;height:60px;min-height:60px;border-radius:50%;padding:0;font-size:22px;background:var(--mint);color:#00130e}
 .status .stop.playing{background:var(--red);color:#fff;box-shadow:0 0 28px rgba(255,69,58,.45)}
+body.live .dvols{gap:8px 16px;grid-template-columns:repeat(4,minmax(0,1fr));padding:12px 16px;align-content:center}
+body.live .dv .dvt{font-size:13px}
+body.live .dv input[type=range]{height:22px}
 
-@media(min-width:900px){
-  body.live main{grid-template-columns:minmax(300px,.8fr) minmax(0,2fr);grid-template-rows:auto auto clamp(330px,46vh,520px) auto;
-    grid-template-areas:"padbar padbar" "kitbar kitbar" "keys drums" "status vols"}
-  body.live .keys{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr}
-  body.live .key{height:auto}
-  body.live .drum-grid{grid-auto-rows:1fr;height:100%}
-  body.live #drumGrid:not(.has16){grid-template-rows:repeat(2,1fr)}
-  body.live #drumGrid.has16{grid-template-rows:repeat(4,1fr)}
-  body.live .dpad{min-height:0}
-  body.live .status{align-self:start}
+/* paisagem larga: teclas à esquerda, bateria à direita */
+@media(min-width:900px) and (orientation:landscape){
+  body.live main{grid-template-columns:repeat(10,minmax(0,1fr));grid-template-rows:auto auto minmax(0,1fr) auto;
+    grid-template-areas:
+      "padbar padbar padbar padbar padbar padbar padbar padbar padbar padbar"
+      "kitbar kitbar kitbar kitbar kitbar kitbar kitbar kitbar kitbar kitbar"
+      "keys keys keys drums drums drums drums drums drums drums"
+      "status status status vols vols vols vols vols vols vols"}
+  body.live .keys{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+/* pouca altura (tablet deitado pequeno, celular deitado): barras lado a lado */
+@media(min-width:700px) and (orientation:landscape) and (max-height:640px){
+  body.live main{grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:
+      "padbar padbar padbar padbar padbar kitbar kitbar kitbar kitbar kitbar"
+      "keys keys keys drums drums drums drums drums drums drums"
+      "status status status vols vols vols vols vols vols vols"}
+  body.live .bar .lbl{display:none}
+  body.live .status{grid-template-areas:"key pad btn";grid-template-columns:auto 1fr auto;padding:8px 14px;gap:0 12px}
+  body.live .status small,body.live .status #stKit{display:none}
+  body.live .status #stPad{margin:0}
+  body.live .status .stkey{font-size:28px}
+  body.live .status .stop{width:44px;height:44px;min-height:44px;font-size:16px}
+  body.live .dvols{padding:6px 12px}
+}
+@media(orientation:landscape) and (max-height:480px){
+  body.live .status,body.live .dvols{display:none!important}
+  body.live main{grid-template-rows:auto minmax(0,1fr);grid-template-areas:
+      "padbar padbar padbar padbar padbar kitbar kitbar kitbar kitbar kitbar"
+      "keys keys keys drums drums drums drums drums drums drums"}
+  body.live header{padding-top:6px;padding-bottom:4px}
+  body.live nav{margin-top:2px}
+  body.live .bar button{width:40px;height:40px;min-width:40px}
+  body.live .bar select{padding-top:8px;padding-bottom:8px}
+}
+/* celular em pé */
 @media(max-width:600px){
-  body.live .dpad{min-height:84px;padding:10px;font-size:13.5px}
-  .bar .lbl{width:auto;font-size:12px}
-  body.live .padbar .lbl,body.live .kitbar .lbl{display:none}
+  body.live main{padding:8px 12px calc(10px + var(--safe-b));gap:8px}
+  body.live .dvols{display:none!important}
+  body.live .bar .lbl{display:none}
+  body.live .status{grid-template-columns:auto 1fr auto;grid-template-areas:"key pad btn";padding:8px 14px;gap:0 12px;align-items:center}
+  body.live .status small,body.live .status #stKit{display:none}
+  body.live .status #stPad{margin:0}
+  body.live .status .stkey{font-size:30px}
+  body.live .status .stop{width:48px;height:48px;min-height:48px;font-size:18px}
+  body.live .dpad{padding:6px 8px;font-size:12.5px}
+  body.live .bar button{width:42px;height:42px;min-width:42px}
+}
+@media(max-height:760px){
+  body.live header{padding-top:calc(6px + var(--safe-t));padding-bottom:4px}
+  body.live nav{margin-top:2px;margin-bottom:0}
 }
