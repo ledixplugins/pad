@@ -336,3 +336,43 @@ body.live .dv input[type=range]{height:22px}
   body.live header{padding-top:calc(6px + var(--safe-t));padding-bottom:4px}
   body.live nav{margin-top:2px;margin-bottom:0}
 }
+
+/* ---------- Palco: seletores de Pad e Kit lado a lado (cada um sobre a sua área) ---------- */
+body.live .bar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:0;row-gap:0;align-items:center;padding:0;overflow:hidden;position:relative}
+body.live .bar .lbl{display:block!important;grid-column:2;grid-row:1;width:auto;align-self:end;padding:8px 4px 0 6px;font-size:11px;line-height:1;color:var(--muted);font-weight:500;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.live .bar select{grid-column:2;grid-row:2;align-self:start;width:100%;min-width:0;border:0;background-color:transparent;border-radius:0;box-shadow:none;padding:2px 24px 9px 6px;font-size:clamp(15px,2.1vh,18px);font-weight:600;line-height:1.25;text-overflow:ellipsis;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%238e8e93' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
+body.live .bar button{grid-row:1 / span 2;width:44px;height:100%;min-width:44px;min-height:44px;border-radius:0;background:transparent;box-shadow:none;border:0;font-size:12px;color:var(--muted)}
+body.live .bar button:first-of-type{grid-column:1;border-right:1px solid rgba(255,255,255,.07)}
+body.live .bar button:last-of-type{grid-column:3;border-left:1px solid rgba(255,255,255,.07)}
+body.live .bar button:active{background:rgba(255,255,255,.1);color:var(--text,#fff)}
+body.live .padbar,body.live .kitbar{padding:0;border-radius:var(--r-md)}
+/* telas em pé / celular: dois seletores lado a lado, depois teclas, bateria */
+body.live main{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto minmax(0,1fr) minmax(0,1.5fr) auto auto;
+  grid-template-areas:"padbar kitbar" "keys keys" "drums drums" "status status" "vols vols"}
+/* paisagem: Pad fica sobre as teclas, Kit sobre a bateria */
+@media(orientation:landscape) and (min-width:700px){
+  body.live main{grid-template-columns:repeat(10,minmax(0,1fr));grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:
+      "padbar padbar padbar kitbar kitbar kitbar kitbar kitbar kitbar kitbar"
+      "keys keys keys drums drums drums drums drums drums drums"
+      "status status status vols vols vols vols vols vols vols"}
+}
+@media(orientation:landscape) and (max-height:480px){
+  body.live main{grid-template-rows:auto minmax(0,1fr);grid-template-columns:repeat(10,minmax(0,1fr));
+    grid-template-areas:
+      "padbar padbar padbar kitbar kitbar kitbar kitbar kitbar kitbar kitbar"
+      "keys keys keys drums drums drums drums drums drums drums"}
+  body.live .bar .lbl{display:none!important}
+  body.live .bar select{padding-top:8px;padding-bottom:8px}
+}
+@media(max-width:600px){
+  body.live .bar button{width:36px;min-width:36px}
+  body.live .bar .lbl{padding-left:4px}
+  body.live .bar select{padding-left:4px;padding-right:20px;font-size:15px}
+}
+body.live .bar button{font-size:15px}
+@media(max-width:600px){
+  body.live .bar button{width:30px;min-width:30px;font-size:13px}
+  body.live .bar select{font-size:13px;padding-right:14px;letter-spacing:-.01em}
+}
