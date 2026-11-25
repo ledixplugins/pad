@@ -783,6 +783,7 @@ function downloadAll() {
   CAT.pads.forEach(function (f) { NOTES.forEach(function (n) { if (f.files[n]) urls.push(f.files[n]); }); });
   CAT.drums.forEach(function (d) { urls.push(d.file); });
   CAT.clicks.forEach(function (k) { if (k.normal) urls.push(k.normal); if (k.accent) urls.push(k.accent); });
+  ['piano','rhodes','organ','strings','pad','choir','halo','bells'].forEach(function (id) { urls.push('sf/' + id + '.json'); urls.push('sf/' + id + '.bin'); });
   var done = 0, prog = $('#offProg'), msg = $('#offMsg'), btn = $('#btnOffline');
   prog.hidden = false; prog.max = urls.length; prog.value = 0; btn.disabled = true; msg.textContent = '';
   var i = 0, fails = 0;

@@ -18,6 +18,19 @@
     { id: 'synth',   name: 'Synth',          env: { a: 0.01, d: 0.4, s: 0.65, r: 0.28 }, lp: { f: 3200, kt: 0.6, q: 2.2 },
       p: [{ t: 'sawtooth', m: 1, g: 0.55, d: -5 }, { t: 'square', m: 1, g: 0.35, d: 5 }] }
   ];
+  /* timbres gravados (extraídos do GeneralUser GS, pasta sf/) */
+  var SF = [
+    { id: 'sf:piano',   file: 'piano', boost: 4.5,   name: 'Piano' },
+    { id: 'sf:rhodes',  file: 'rhodes', boost: 1.4,  name: 'Rhodes' },
+    { id: 'sf:organ',   file: 'organ', boost: 2,   name: 'Órgão' },
+    { id: 'sf:strings', file: 'strings', boost: 3.5, name: 'Cordas' },
+    { id: 'sf:pad',     file: 'pad', boost: 5,     name: 'Pad quente' },
+    { id: 'sf:choir',   file: 'choir', boost: 2.2,   name: 'Coro' },
+    { id: 'sf:halo',    file: 'halo', boost: 2,    name: 'Halo' },
+    { id: 'sf:bells',   file: 'bells', boost: 1.8,   name: 'Sinos' }
+  ];
+  SF.forEach(function (t) { t.sf = true; });
+  var ALL = SF.concat(TIMBRES);
   var NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   var NOTAS_PT = ['Dó', 'Dó sustenido', 'Ré', 'Ré sustenido', 'Mi', 'Fá', 'Fá sustenido', 'Sol', 'Sol sustenido', 'Lá', 'Lá sustenido', 'Si'];
   function $(s) { return document.querySelector(s); }
@@ -27,17 +40,17 @@
   var ST = null;                       // estado salvo em S.stage
   function st() {
     if (ST) return ST;
-    var d = { timbre: 'ep', base: 48, vol: 0.7, rev: 0.25 };
+    var d = { timbre: 'sf:piano', base: 48, vol: 0.7, rev: 0.25 };
     var s = (AP.S && AP.S.stage) || {};
     ST = {};
     Object.keys(d).forEach(function (k) { ST[k] = (s[k] !== undefined) ? s[k] : d[k]; });
-    if (!TIMBRES.some(function (t) { return t.id === ST.timbre; })) ST.timbre = 'ep';
+    if (!ALL.some(function (t) { return t.id === ST.timbre; })) ST.timbre = 'sf:piano';
     if (!(ST.base >= 12 && ST.base <= 84 && ST.base % 12 === 0)) ST.base = 48;
     AP.S.stage = ST;
     return ST;
   }
   function persist() { try { AP.S.stage = ST; AP.save(); } catch (e) {} }
-  function timbre() { var id = st().timbre; for (var i = 0; i < TIMBRES.length; i++) if (TIMBRES[i].id === id) return TIMBRES[i]; return TIMBRES[0]; }
+  function timbre() { var id = st().timbre; for (var i = 0; i < ALL.length; i++) if (ALL[i].id === id) return ALL[i]; return ALL[0]; }
 
   /* ---------- áudio ---------- */
   var ctx = null, bus = null, send = null, lfo = null, lfoG = null;
@@ -74,9 +87,11 @@
     if (ctx.state !== 'running') ctx.resume();
     if (voices[n]) kill(n, true);
     delete held[n];
-    var tb = timbre(), t = ctx.currentTime, e = tb.env, v = Math.max(0.05, Math.min(1, (vel || 100) / 127));
+    var tb = timbre(), t = ctx.currentTime, v = Math.max(0.05, Math.min(1, (vel || 100) / 127));
+    if (tb.sf) { noteOnSF(n, vel || 100, tb, t, v); return; }
+    var e = tb.env;
     var freq = 440 * Math.pow(2, (n - 69) / 12);
-    var out = ctx.createGain(); out.gain.value = Math.pow(v, 1.4) * 0.5;
+    var out = ctx.createGain(); out.gain.value = Math.pow(v, 1.4) * 0.32;
     var env = ctx.createGain(); env.gain.setValueAtTime(0.0001, t);
     env.gain.linearRampToValueAtTime(1, t + e.a);
     if (e.d) env.gain.setTargetAtTime(e.s, t + e.a, e.d / 3);
@@ -98,18 +113,66 @@
       o.connect(g); g.connect(head); o.start(t);
       oscs.push({ osc: o, base: base });
     });
-    voices[n] = { oscs: oscs, env: env, out: out, r: e.r };
+    voices[n] = { oscs: oscs, envs: [env], out: out, r: e.r };
     order.push(n);
+    if (order.length > 28) { var old = order.shift(); if (old !== n && voices[old]) kill(old, false); }
+  }
+  var bank = {};                       // id -> { st:'loading'|'ready'|'error', bufs:[], zones:[], trim }
+  function loadBank(tb) {
+    var b = bank[tb.id]; if (b) return b.p;
+    b = bank[tb.id] = { st: 'loading' };
+    b.p = Promise.all([fetch('sf/' + tb.file + '.json').then(function (r) { return r.json(); }), fetch('sf/' + tb.file + '.bin').then(function (r) { return r.arrayBuffer(); })])
+      .then(function (a) {
+        var j = a[0], pcm = new Int16Array(a[1]);
+        b.bufs = j.samples.map(function (sm) {
+          var buf = ctx.createBuffer(1, sm[1], sm[2]), d = buf.getChannelData(0), o = sm[0];
+          for (var i = 0; i < sm[1]; i++) d[i] = pcm[o + i] / 32768;
+          return buf;
+        });
+        b.zones = j.zones; b.trim = j.trim; b.st = 'ready';
+      }).catch(function () { b.st = 'error'; delete bank[tb.id]; });
+    return b.p;
+  }
+  function noteOnSF(n, vel, tb, t, v) {
+    var b = bank[tb.id];
+    if (!b || b.st !== 'ready') { loadBank(tb); return; }
+    var voice = { oscs: [], envs: [], out: null, r: 0.2 }, vc = Math.pow(v, 1.5) * b.trim * 0.55 * (tb.boost || 1);
+    var out = ctx.createGain(); out.gain.value = vc; out.connect(bus); voice.out = out;
+    b.zones.forEach(function (z) {
+      if (n < z[0] || n > z[1] || vel < z[2] || vel > z[3]) return;
+      var buf = b.bufs[z[4]], src = ctx.createBufferSource(), env = ctx.createGain(), g = ctx.createGain(), node = g;
+      src.buffer = buf;
+      src.playbackRate.value = Math.pow(2, ((n - z[5]) * z[7] + z[6]) / 1200);
+      src.detune.value = bend * 200;
+      lfoG.connect(src.detune);
+      if ((z[8] === 1 || z[8] === 3) && z[10] > z[9] + 8) { src.loop = true; src.loopStart = z[9] / buf.sampleRate; src.loopEnd = z[10] / buf.sampleRate; }
+      g.gain.value = z[16];
+      var att = Math.max(0.002, z[11]), sus = z[14], dec = z[13], sdb = sus > 0 ? -20 * Math.log10(sus) : 100;
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.linearRampToValueAtTime(1, t + att);
+      var t1 = t + att + z[12];
+      env.gain.setValueAtTime(1, t1);
+      env.gain.setTargetAtTime(sus, t1, Math.max(0.01, dec * Math.min(1, sdb / 100)) / 3);
+      env._r = z[15]; if (z[15] > voice.r) voice.r = z[15];
+      if (ctx.createStereoPanner && z[17]) { var pn = ctx.createStereoPanner(); pn.pan.value = z[17]; g.connect(pn); node = pn; }
+      src.connect(g); node.connect(env); env.connect(out);
+      src.start(t);
+      voice.oscs.push({ osc: src, base: 0 }); voice.envs.push(env);
+    });
+    if (!voice.envs.length) { try { out.disconnect(); } catch (e) {} return; }
+    voices[n] = voice; order.push(n);
     if (order.length > 28) { var old = order.shift(); if (old !== n && voices[old]) kill(old, false); }
   }
   function kill(n, fast) {
     var vo = voices[n]; if (!vo) return;
     delete voices[n]; order = order.filter(function (x) { return x !== n; });
-    var t = ctx.currentTime, r = fast ? 0.03 : vo.r;
+    var t = ctx.currentTime, r = fast ? 0.03 : Math.min(vo.r, 4);
     try {
-      vo.env.gain.cancelScheduledValues(t);
-      vo.env.gain.setValueAtTime(vo.env.gain.value, t);
-      vo.env.gain.setTargetAtTime(0, t, r / 4);
+      vo.envs.forEach(function (en) {
+        en.gain.cancelScheduledValues(t);
+        en.gain.setValueAtTime(en.gain.value, t);
+        en.gain.setTargetAtTime(0, t, (fast ? 0.03 : (en._r || vo.r)) / 4);
+      });
     } catch (e) {}
     vo.oscs.forEach(function (o) { try { o.osc.stop(t + r * 1.3 + 0.1); } catch (e) {} });
     setTimeout(function () { try { vo.out.disconnect(); } catch (e) {} }, (r * 1.3 + 0.4) * 1000);
@@ -198,11 +261,19 @@
   /* ---------- controles ---------- */
   function setTimbre(id, quiet) {
     st().timbre = id; $('#stTimbre').value = id; $('#stName').textContent = timbre().name; persist();
-    if (!quiet && AP.toast) AP.toast(timbre().name);
+    allOff();
+    var tb = timbre();
+    if (tb.sf && ensure()) {
+      var b = bank[tb.id];
+      if (!b || b.st !== 'ready') {
+        $('#stName').textContent = 'Carregando…';
+        loadBank(tb).then(function () { if (st().timbre === tb.id) $('#stName').textContent = bank[tb.id] && bank[tb.id].st === 'ready' ? tb.name : 'Sem conexão'; });
+      }
+    }
   }
   function stepTimbre(d) {
-    var i = TIMBRES.map(function (t) { return t.id; }).indexOf(st().timbre);
-    setTimbre(TIMBRES[(i + d + TIMBRES.length) % TIMBRES.length].id);
+    var i = ALL.map(function (t) { return t.id; }).indexOf(st().timbre);
+    setTimbre(ALL[(i + d + ALL.length) % ALL.length].id);
   }
   function setSustain(on) {
     sustain = on; $('#stSus').classList.toggle('on', on);
@@ -211,7 +282,11 @@
   function pct(v) { return Math.round(v * 100) + '%'; }
   function bindControls() {
     var sel = $('#stTimbre');
-    TIMBRES.forEach(function (t) { var o = document.createElement('option'); o.value = t.id; o.textContent = t.name; sel.appendChild(o); });
+    [['Sons gravados', SF], ['Sintetizados', TIMBRES]].forEach(function (g) {
+      var og = document.createElement('optgroup'); og.label = g[0];
+      g[1].forEach(function (t) { var o = document.createElement('option'); o.value = t.id; o.textContent = t.name; og.appendChild(o); });
+      sel.appendChild(og);
+    });
     sel.onchange = function () { setTimbre(sel.value); };
     $('#stPrev').onclick = function () { stepTimbre(-1); };
     $('#stNext').onclick = function () { stepTimbre(1); };
@@ -254,7 +329,7 @@
     var w = window.innerWidth;
     window.addEventListener('resize', function () { var c = wantCount(); if (c !== count) { allOff(); build(); } });
     document.addEventListener('visibilitychange', function () { if (document.hidden) allOff(); });
-    $$('#tabs button').forEach(function (b) { b.addEventListener('click', function () { if (b.dataset.tab !== 'fx') allOff(); }); });
+    $$('#tabs button').forEach(function (b) { b.addEventListener('click', function () { if (b.dataset.tab !== 'fx') allOff(); else setTimbre(st().timbre, true); }); });
     window.StageLab = { midi: midi, allOff: allOff };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
