@@ -376,3 +376,124 @@ body.live .bar button{font-size:15px}
   body.live .bar button{width:30px;min-width:30px;font-size:13px}
   body.live .bar select{font-size:13px;padding-right:14px;letter-spacing:-.01em}
 }
+
+/* ---------- StageLab: teclado de palco (referência: AURA Synth Bass) ---------- */
+html:has(body.stage),body.stage{height:100%;overflow:hidden}
+body.stage{display:flex;flex-direction:column;height:100vh;height:100dvh;min-height:0}
+body.stage header,body.stage nav{flex:none}
+body.stage nav{position:relative;top:auto}
+body.stage main{flex:1;min-height:0;width:100%;max-width:none;margin:0;padding:10px 16px calc(12px + var(--safe-b));display:flex;flex-direction:column}
+body.stage .tab.on{display:flex;flex-direction:column;flex:1;min-height:0;gap:10px}
+body.stage .tab.on>*{margin:0}
+@media(max-height:760px){body.stage header{padding-top:calc(6px + var(--safe-t));padding-bottom:4px}body.stage nav{margin-top:2px;margin-bottom:0}}
+@media(orientation:landscape) and (max-height:480px){body.stage header{padding-top:6px;padding-bottom:4px}body.stage nav{margin-top:2px}}
+
+.stseg{display:flex;gap:2px;padding:3px;border-radius:14px;background:var(--s1);align-self:flex-start}
+.stseg button{border-radius:11px;padding:6px 18px;min-height:34px;background:transparent;font-size:14px;font-weight:500}
+.stseg button.on{background:#636366;color:#fff;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.stview{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.stview[hidden]{display:none!important}
+
+/* painel de controle */
+.console{flex:1 1 auto;min-height:0;display:grid;gap:10px 14px;align-content:center;background:var(--s1);border-radius:var(--r-lg);padding:14px 16px;
+  grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"tb tb tb" "oc sus sus" "vol vol rev"}
+.console .timbre{grid-area:tb;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;background:#000;border-radius:var(--r-md);box-shadow:inset 0 0 0 1px var(--line)}
+.console .timbre button{width:56px;height:100%;min-height:56px;border-radius:0;background:transparent;color:var(--muted);font-size:15px}
+.console .timbre button:first-child{border-right:1px solid var(--line)}.console .timbre button:last-child{border-left:1px solid var(--line)}
+.console .tname{position:relative;text-align:center;padding:8px 0;min-width:0}
+.console .tname small{display:block;font-size:12px}
+.console .tname b{display:block;font-size:clamp(22px,4.4vh,34px);font-weight:700;letter-spacing:-.025em;color:var(--amber);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 18px rgba(255,159,10,.35)}
+.console .tname select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;background:none;padding:0}
+.console .octs{grid-area:oc;display:flex;align-items:center;gap:12px}
+.console .octs small{font-size:13px}
+.console .oct{display:flex;align-items:center;background:var(--s2);border-radius:999px;overflow:hidden}
+.console .oct button{width:48px;min-height:44px;border-radius:0;background:transparent;font-size:20px;padding:0}
+.console .oct b{min-width:44px;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
+.console .sus{grid-area:sus;justify-self:end}
+.console .stsl{display:flex;flex-direction:column;gap:2px;color:var(--muted);font-size:13px;min-width:0}
+.console .stsl span{display:flex;justify-content:space-between}.console .stsl output{color:var(--txt);font-variant-numeric:tabular-nums}
+.console .stsl:nth-of-type(1){grid-area:vol}.console .stsl:nth-of-type(2){grid-area:rev}
+.console .stsl:nth-of-type(1),.console .stsl:nth-of-type(2){grid-column:auto}
+
+/* teclado */
+.board{flex:0 0 auto;height:clamp(170px,40vh,360px);display:flex;gap:0;background:linear-gradient(180deg,#000,#0c0d0e);border-radius:var(--r-md);overflow:hidden;padding:0 8px 10px 0;box-shadow:inset 0 0 0 1px var(--line)}
+.board .wheels{flex:0 0 auto;display:flex;gap:12px;padding:12px 16px 10px;margin-right:8px;border-right:1px solid #000;background:linear-gradient(180deg,#1b1d21,#0e1013);box-shadow:inset 0 0 0 1px #000,inset 0 0 0 2px #3a3d43,4px 0 8px rgba(0,0,0,.6)}
+.board .whc{display:flex;flex-direction:column;align-items:center;gap:6px;width:clamp(34px,4vw,46px)}
+.board .whc small{font-size:11px;font-weight:600;color:#ece7d6;letter-spacing:.04em}
+.wh{flex:1;width:100%;border-radius:9px;background:#000;position:relative;touch-action:none;overflow:hidden;box-shadow:inset 0 0 0 2px #2a2c30,inset 0 6px 12px #000,0 1px 0 rgba(255,255,255,.12)}
+.roll{position:absolute;inset:4px 6px;border-radius:6px;background:linear-gradient(180deg,rgba(0,0,0,.9),rgba(255,255,255,.14) 50%,rgba(0,0,0,.9)),repeating-linear-gradient(180deg,#34363b 0 4px,#0e0f11 4px 9px);background-position:0 0,0 var(--off,0px)}
+.notch{position:absolute;left:5px;right:5px;height:5px;margin-top:-2.5px;border-radius:3px;background:#f2f3f4;box-shadow:0 0 6px rgba(255,255,255,.6);top:50%}
+#whPitch .notch.spring{transition:top .12s ease-out}
+.stkeys{position:relative;flex:1;min-width:0;touch-action:none;margin-top:8px}
+.k{position:absolute;top:0}
+.k.w{height:100%;background:linear-gradient(180deg,#d9d6cc 0,#f7f5ef 7%,#fdfcf8 60%,#ece9e0 100%);border:1px solid #77736b;border-top:0;border-radius:0 0 6px 6px;box-shadow:inset 0 -10px 10px rgba(0,0,0,.14),inset 2px 0 0 rgba(255,255,255,.9),inset -1px 0 0 rgba(0,0,0,.08)}
+.k.b{height:61%;z-index:2;background:linear-gradient(90deg,#000 0,#2b2d31 12%,#1a1b1e 50%,#2b2d31 88%,#000 100%);border-radius:0 0 5px 5px;box-shadow:0 5px 6px rgba(0,0,0,.65),inset 0 -9px 5px rgba(255,255,255,.10),inset 0 -1px 0 rgba(255,255,255,.25)}
+.k.w.d{background:linear-gradient(180deg,#f2b86a,#ffd089 30%,#ffab2e);box-shadow:inset 0 -3px 6px rgba(0,0,0,.2)}
+.k.b.d{background:linear-gradient(180deg,#b06a05,#6a3e00);box-shadow:0 2px 3px rgba(0,0,0,.65)}
+.kl{position:absolute;left:0;right:0;bottom:9px;text-align:center;font-size:11px;font-weight:700;color:#8d897f;pointer-events:none}
+.k.w.d .kl{color:#5a3a00}
+
+/* efeitos */
+#stFx{gap:10px;overflow:hidden}
+#stFx .card h3{margin-bottom:8px}
+
+/* paisagem: painel numa linha só */
+@media(orientation:landscape) and (min-width:600px){
+  .console{grid-template-columns:minmax(0,2.2fr) auto auto minmax(0,1fr) minmax(0,1fr);grid-template-areas:"tb oc sus vol rev";align-items:center}
+  #stFx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start}
+  #stFx[hidden]{display:none!important}
+  .console .octs{flex-direction:column;align-items:flex-start;gap:2px}
+}
+@media(orientation:landscape) and (max-height:480px){
+  .board{min-height:110px}
+  .console{padding:8px 12px}.console .timbre button{min-height:44px}
+  .console .tname small{display:none}
+  .stseg button{min-height:30px;padding:4px 14px}
+}
+/* celular em pé: sem rodas, 13 teclas */
+@media(max-width:600px){
+  .board .wheels{display:none}.board{padding-left:8px}
+  .console{padding:10px 12px}
+  #stFx .card p.muted{display:none}
+}
+
+/* ajustes finos do StageLab */
+.console{flex:0 0 auto}
+.board{flex:1 1 auto;height:auto;min-height:150px;max-height:560px}
+.console .tname b{font-size:clamp(20px,3.4vh,30px)}
+#stFx .fxgrid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px 18px;padding:14px 16px}
+#stFx .fxgrid label{min-width:0}
+#stFx .card{padding:14px 16px}
+#stFx .card .row.gap{gap:8px 14px}
+#stFx .card label{min-width:120px}
+@media(orientation:landscape) and (min-width:600px){
+  #stFx{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto}
+  #stFx .fxgrid{grid-column:1 / -1}
+}
+@media(max-height:560px){
+  #stFx .card h3,#stFx .card p.muted{display:none}
+  #stFx .card{padding:10px 14px}
+  #stFx .fxgrid{padding:10px 14px}
+  .board{min-height:110px}
+}
+@media(max-width:600px){ .console .tname b{font-size:22px} }
+@media(orientation:landscape) and (max-height:480px){
+  .console{grid-template-columns:minmax(0,1.5fr) auto auto minmax(0,1fr);grid-template-areas:"tb oc sus sus" "tb vol vol rev";gap:6px 12px}
+  .console .tname b{font-size:20px}
+  .console .octs{flex-direction:row;align-items:center}
+  .console .octs small{display:none}
+  #stFx{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  #stFx .fxgrid{grid-column:1 / -1;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px 12px}
+  #stFx .fxgrid label{font-size:12px}
+  #stFx .card:nth-child(2){grid-column:span 2}
+  #stFx .card:nth-child(2) .row.gap{flex-wrap:nowrap;align-items:flex-end}
+  #stFx .card:nth-child(2) label{min-width:0}
+  #stFx .card:nth-child(2) button{padding:8px 12px;min-height:40px;font-size:14px;white-space:nowrap}
+  #stFx .card:nth-child(3) button{padding:8px 12px;min-height:40px;font-size:14px;white-space:nowrap}
+  #stFx input[type=range]{height:22px}
+}
+@media(orientation:landscape) and (max-height:480px){
+  .console{grid-template-columns:minmax(0,2.4fr) auto auto minmax(0,1fr)}
+  .console .timbre{gap:4px}
+  .console .timbre button{width:38px}
+}

@@ -680,6 +680,7 @@ function renderMidiMap() {
   });
 }
 function onMidi(e) {
+  if (!armed && window.StageLab && StageLab.midi(e)) return;
   var d = e.data, st = d[0] & 0xf0, n = d[1], v = d[2];
   var key = null, on = false;
   if (st === 0x90 && v > 0) { key = 'note:' + n; on = true; }
@@ -730,6 +731,7 @@ function bindUI() {
       $$('#tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
       var live = b.dataset.tab === 'live';
       document.body.classList.toggle('live', live);
+      document.body.classList.toggle('stage', b.dataset.tab === 'fx');
       $$('.tab').forEach(function (t) {
         t.classList.toggle('on', live ? (t.id === 'tab-pads' || t.id === 'tab-drums') : t.id === 'tab-' + b.dataset.tab);
       });
@@ -807,5 +809,6 @@ function boot() {
     loadClicks(); preloadKit(); prefetchFamily(S.family); initMidi();
   }).catch(function (e) { toast('Erro ao carregar o catálogo'); console.error(e); });
 }
+window.AuraPad = { get ctx() { return ctx; }, get A() { return A; }, S: S, save: save, toast: toast };
 boot();
 })();
