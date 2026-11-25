@@ -26,7 +26,7 @@ function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
 var DEF = {
   family: 'shimmer', key: 'C', padVol: 0.8, padFade: 4, padLoop: 5, drumVol: 0.9, masterVol: 0.9,
   fx: { cut: 1, pan: 0, low: 0, high: 0, rev: 0.25, comp: false, th: -24, ra: 4 },
-  family2: '', mix2: 0.5, lists: {}, listName: 'Setlist 1',
+  family2: '', mix2: 0.5, pulse: 0, pulseDepth: 0.5, swell: 0, lists: {}, listName: 'Setlist 1',
   bpm: 72, sig: 4, click: 'classic', metVol: 0.7, accent: true,
   kit: DEFAULT_KIT.slice(), dvol: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], kitSel: 'f:Worship Drums', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
 };
@@ -74,7 +74,8 @@ function initAudio() {
   A.mix.connect(A.lim); A.lim.connect(A.master); A.master.connect(ctx.destination);
 
   A.padBus = ctx.createGain();
-  A.l1 = ctx.createGain(); A.l2 = ctx.createGain(); A.l1.connect(A.padBus); A.l2.connect(A.padBus);
+  A.l1 = ctx.createGain(); A.l2 = ctx.createGain(); A.pulse = ctx.createGain(); A.l1.connect(A.pulse); A.l2.connect(A.pulse); A.pulse.connect(A.padBus);
+  A.pLfo = ctx.createOscillator(); A.pLfo.type = 'sine'; A.pLfo.frequency.value = 1; A.pLfoG = ctx.createGain(); A.pLfoG.gain.value = 0; A.pLfo.connect(A.pLfoG); A.pLfoG.connect(A.pulse.gain); A.pLfo.start();
   A.lp = ctx.createBiquadFilter(); A.lp.type = 'lowpass'; A.lp.Q.value = 0.7;
   A.pan = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
   A.low = ctx.createBiquadFilter(); A.low.type = 'lowshelf'; A.low.frequency.value = 200;
@@ -105,6 +106,7 @@ function applyAll() {
   if (!ctx) return;
   set(A.master.gain, S.masterVol);
   set(A.padBus.gain, duckOn ? S.padVol * 0.18 : S.padVol, duckOn ? 0.12 : 0.4);
+  applyPulse();
   var m2 = S.family2 ? clamp(S.mix2, 0, 1) : 0;
   set(A.l1.gain, Math.cos(m2 * Math.PI / 2)); set(A.l2.gain, Math.sin(m2 * Math.PI / 2));
   set(A.drumBus.gain, S.drumVol);
@@ -205,9 +207,9 @@ function padStart() {
   prefetchFamily(fam); if (fam2) prefetchFamily(fam2);
   return Promise.all([getPadBuffer(fam, note), fam2 ? getPadBuffer(fam2, note) : null]).then(function (b) {
     if (req !== padReq) return;
-    var old = padStream, old2 = padStream2;
-    padStream = new Stream(b[0], S.padFade, S.padLoop, A.l1);
-    padStream2 = b[1] ? new Stream(b[1], S.padFade, S.padLoop, A.l2) : null;
+    var old = padStream, old2 = padStream2, fi = (!old && !old2 && swellSecs()) ? swellSecs() : S.padFade;
+    padStream = new Stream(b[0], fi, S.padLoop, A.l1);
+    padStream2 = b[1] ? new Stream(b[1], fi, S.padLoop, A.l2) : null;
     if (old) old.stop(S.padFade); if (old2) old2.stop(S.padFade);
     padOn = true; padNote = note; padLoadingNote = null; renderKeys(); renderPadBtn();
   }).catch(function (e) { padLoadingNote = null; renderKeys(); toast('Não consegui carregar o pad'); console.error(e); });
@@ -536,9 +538,16 @@ function metStop() {
   $$('#beats .beat').forEach(function (d) { d.classList.remove('on'); });
   $('#metToggle').textContent = '▶ Iniciar'; $('#metToggle').classList.remove('on');
 }
+function applyPulse() {
+  if (!ctx || !A.pLfo) return;
+  var on = S.pulse > 0, d = on ? clamp(S.pulseDepth, 0, 1) : 0;
+  set(A.pulse.gain, 1 - d / 2, 0.1); set(A.pLfoG.gain, d / 2, 0.1);
+  if (on) A.pLfo.frequency.setTargetAtTime(S.bpm / 60 / S.pulse, ctx.currentTime, 0.05);
+}
+function swellSecs() { return S.swell > 0 ? S.swell * 4 * 60 / S.bpm : 0; }
 function setBpm(v) {
   v = clamp(Math.round(v), 30, 260); S.bpm = v;
-  $('#bpm').value = v; $('#bpmRange').value = v; save();
+  $('#bpm').value = v; $('#bpmRange').value = v; save(); applyPulse();
 }
 var taps = [];
 function tapTempo() {
@@ -880,6 +889,11 @@ function bindUI() {
   $('#padFade').value = S.padFade; $('#padFadeO').textContent = S.padFade + ' s';
   $('#padFade').oninput = function (e) { S.padFade = parseFloat(e.target.value); $('#padFadeO').textContent = S.padFade + ' s'; save(); };
   $('#padLoop').value = S.padLoop; $('#padLoopO').textContent = S.padLoop + ' s';
+  var ps = $('#pulseSel'), pd = $('#pulseDepth'), sw = $('#swellSel');
+  ps.value = S.pulse; pd.value = S.pulseDepth; sw.value = S.swell; pd.disabled = !S.pulse;
+  ps.onchange = function () { S.pulse = parseFloat(ps.value); pd.disabled = !S.pulse; applyPulse(); save(); };
+  pd.oninput = function () { S.pulseDepth = parseFloat(pd.value); applyPulse(); save(); };
+  sw.onchange = function () { S.swell = parseFloat(sw.value); save(); };
   $('#padLoop').oninput = function (e) { S.padLoop = parseFloat(e.target.value); $('#padLoopO').textContent = S.padLoop + ' s'; save(); };
   $('#btnPanic').onclick = function () { padStop(0.4); metStop(); toast('Tudo parado'); };
   // teclado do computador

@@ -779,3 +779,10 @@ body.stage .fam small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #tab-setlist > .row.between > .row.gap.wrap > button{flex:1;min-width:0;height:36px;min-height:36px;padding:0 8px;font-size:13px}
   #tab-setlist .listbar{flex-wrap:nowrap!important}
 }
+@media (max-height:700px){
+  #tab-pads .sliders{gap:4px 10px}
+  #tab-pads .sliders label{font-size:12px;gap:2px}
+  #tab-pads .sliders select{padding:5px 24px 5px 8px;font-size:13px}
+}
+@media (max-height:700px){body.stage #tab-pads .live-extra{display:none}}
+@media (max-height:700px){body.stage .fam small{display:none}}
