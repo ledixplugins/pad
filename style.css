@@ -187,24 +187,11 @@ body.learn [data-action]{outline:2px dashed var(--amber);outline-offset:3px}
   transition:opacity .25s,transform .25s;pointer-events:none;z-index:99;max-width:90%;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 
-/* ---------- Palco: pads + drums juntos ---------- */
-body.live main{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;align-items:start;max-width:1400px}
-body.live main>.tab{margin:0}
-body.live #tab-drums>.card,body.live .sliders{display:none}
-body.live #tab-pads .fams{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
-body.live h2{font-size:22px}
-body.live .key{height:76px}
-@media(min-width:900px){
-  body.live main{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
-  body.live .keys{grid-template-columns:repeat(4,minmax(0,1fr))}
-  body.live .key{height:88px}
-}
 @media(max-width:600px){
   h2{font-size:24px}main{padding:14px 14px calc(40px + var(--safe-b))}header{padding-left:14px;padding-right:14px}nav{margin-left:10px}
   .bpm input{font-size:68px;width:140px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-body.live main>.tab{min-width:0}
 #btnPanic{white-space:nowrap}
 @media(max-width:600px){.key{height:68px;font-size:20px}.mini input{width:70px}.hdr-right{gap:8px}header{gap:10px}}
 
@@ -241,4 +228,63 @@ body.live main>.tab{min-width:0}
   .dpad{aspect-ratio:1/1;font-size:12.5px;padding:4px}
   .dpad b{font-size:11px}
   .card{padding:14px}
+}
+
+/* ---------- barras de seleção (pad e kit) ---------- */
+.bar{display:flex;align-items:center;gap:10px}
+.bar .lbl{width:78px;flex:none;color:var(--muted);font-size:14px;font-weight:500}
+.bar select{flex:1;min-width:0;font-size:17px;font-weight:600;padding:12px 40px 12px 16px;border-radius:999px;text-align:left}
+.bar button{min-width:48px;width:48px;height:48px;padding:0;border-radius:50%;font-size:14px;flex:none}
+.padbar,.status{display:none}
+.kitbar{margin-top:16px}
+.dvols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 18px}
+.dv .dvt{display:flex;justify-content:space-between;gap:8px;font-size:14px;margin-bottom:2px}
+.dv .dvt b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv .dvt output{float:none;color:var(--muted);font-size:13px}
+
+/* ---------- Palco: tudo numa tela, como um painel de palco ---------- */
+body.live main{display:grid;max-width:1500px;gap:14px 18px;grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"padbar" "kitbar" "keys" "drums" "status" "vols"}
+body.live .tab.on{display:contents}
+body.live .tab.on>*{margin:0}
+body.live .tab>.row.between,body.live .sliders,body.live #famCats,body.live #fams,body.live #tab-drums>.card:not(.dvols),body.live #tab-pads>.card{display:none}
+body.live .padbar{display:flex;grid-area:padbar}
+body.live .kitbar{grid-area:kitbar;margin-top:0}
+body.live #keys{grid-area:keys}
+body.live #drumGrid{grid-area:drums}
+body.live .status{display:grid;grid-area:status}
+body.live .dvols{grid-area:vols}
+body.live .dvols.hidden{display:none!important}
+body.live .padbar,body.live .kitbar{background:var(--s1);padding:8px 12px;border-radius:var(--r-md)}
+body.live .keys{grid-template-columns:repeat(6,minmax(0,1fr))}
+body.live .key{height:70px}
+body.live #drumGrid:not(.has16) .dpad:nth-child(n+9){display:none}
+body.live .dpad{aspect-ratio:auto;min-height:92px;align-items:flex-start;justify-content:flex-start;text-align:left;padding:12px 14px;font-size:15px;font-weight:600}
+body.live .dpad b{font-weight:500}
+body.live .dpad span{text-wrap:wrap}
+body.live .dpad.hit{transform:scale(.98)}
+
+.status{background:var(--s1);border-radius:var(--r-md);padding:16px 18px;grid-template-columns:1fr auto;grid-template-areas:"lb btn" "key btn" "pad pad" "kit kit";gap:2px 14px;align-items:center}
+.status small{grid-area:lb;font-size:13px}
+.status .stkey{grid-area:key;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.status .stline{font-size:14px;color:var(--muted)}
+.status #stPad{grid-area:pad;margin-top:8px}.status #stKit{grid-area:kit}
+.status .stop{grid-area:btn;width:64px;height:64px;min-height:64px;border-radius:50%;padding:0;font-size:22px;background:var(--mint);color:#00130e}
+.status .stop.playing{background:var(--red);color:#fff;box-shadow:0 0 28px rgba(255,69,58,.45)}
+
+@media(min-width:900px){
+  body.live main{grid-template-columns:minmax(300px,.8fr) minmax(0,2fr);grid-template-rows:auto auto clamp(330px,46vh,520px) auto;
+    grid-template-areas:"padbar padbar" "kitbar kitbar" "keys drums" "status vols"}
+  body.live .keys{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr}
+  body.live .key{height:auto}
+  body.live .drum-grid{grid-auto-rows:1fr;height:100%}
+  body.live #drumGrid:not(.has16){grid-template-rows:repeat(2,1fr)}
+  body.live #drumGrid.has16{grid-template-rows:repeat(4,1fr)}
+  body.live .dpad{min-height:0}
+  body.live .status{align-self:start}
+}
+@media(max-width:600px){
+  body.live .dpad{min-height:84px;padding:10px;font-size:13.5px}
+  .bar .lbl{width:auto;font-size:12px}
+  body.live .padbar .lbl,body.live .kitbar .lbl{display:none}
 }

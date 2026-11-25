@@ -46,7 +46,20 @@
       <button id="padToggle" data-action="pad:toggle" class="primary">▶ Tocar</button>
     </div>
   </div>
+  <div class="padbar bar">
+    <span class="lbl">Pad</span>
+    <button id="famPrev" data-action="fam:prev" title="Pad anterior">◀</button>
+    <select id="famSel" aria-label="Pad"></select>
+    <button id="famNext" data-action="fam:next" title="Próximo pad">▶</button>
+  </div>
   <div id="keys" class="keys"></div>
+  <div class="status" id="status">
+    <small>Tom</small>
+    <div class="stkey" id="stKey">C</div>
+    <div class="stline" id="stPad"></div>
+    <div class="stline" id="stKit"></div>
+    <button id="stBtn" class="stop" data-action="pad:toggle" aria-label="Tocar ou parar o pad"></button>
+  </div>
   <div class="row gap wrap sliders">
     <label>Volume <input type="range" id="padVol" min="0" max="1" step="0.01" value="0.8"></label>
     <label>Troca de tom <output id="padFadeO">4 s</output><input type="range" id="padFade" min="0.5" max="12" step="0.5" value="4"></label>
@@ -65,12 +78,14 @@
       <label class="mini">Volume <input type="range" id="drumVol" min="0" max="1" step="0.01" value="0.9"></label>
     </div>
   </div>
-  <div class="kitbar">
+  <div class="kitbar bar">
+    <span class="lbl">Drum Kit</span>
     <button id="kitPrev" data-action="kit:prev" title="Kit anterior">◀</button>
     <select id="kitSel" aria-label="Kit de bateria"></select>
     <button id="kitNext" data-action="kit:next" title="Próximo kit">▶</button>
   </div>
   <div id="drumGrid" class="drum-grid"></div>
+  <div id="dvols" class="card dvols"></div>
   <div class="card">
     <div class="row gap wrap">
       <button id="setDel" class="danger">Excluir kit salvo</button>

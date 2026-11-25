@@ -25,7 +25,7 @@ var DEF = {
   family: 'shimmer', key: 'C', padVol: 0.8, padFade: 4, padLoop: 5, drumVol: 0.9, masterVol: 0.9,
   fx: { cut: 1, pan: 0, low: 0, high: 0, rev: 0.25, comp: false, th: -24, ra: 4 },
   bpm: 72, sig: 4, click: 'classic', metVol: 0.7, accent: true,
-  kit: DEFAULT_KIT.slice(), kitSel: 'f:Kit 3', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
+  kit: DEFAULT_KIT.slice(), dvol: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], kitSel: 'f:Kit 3', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
 };
 var S = (function () {
   var s = {};
@@ -36,6 +36,7 @@ var S = (function () {
     else out[k] = s[k];
   });
   if (!Array.isArray(out.kit) || out.kit.length !== 16) out.kit = DEFAULT_KIT.slice();
+  if (!Array.isArray(out.dvol) || out.dvol.length !== 16) out.dvol = DEF.dvol.slice();
   return out;
 })();
 var saveT = null;
@@ -234,13 +235,33 @@ function renderKeys() {
     b.classList.toggle('live', padOn && n === padNote);
     b.classList.toggle('loading', n === padLoadingNote);
   });
+  renderStatus();
 }
 function renderPadBtn() {
   var b = $('#padToggle'); b.textContent = padOn ? '■ Parar' : '▶ Tocar'; b.classList.toggle('on', padOn);
+  renderStatus();
+}
+function renderStatus() {
+  var k = $('#stKey'); if (!k) return;
+  k.textContent = LABEL[padOn && padNote ? padNote : S.key] || '';
+  $('#stPad').textContent = 'Pad: ' + (FAM[S.family] ? FAM[S.family].name : '—');
+  $('#stKit').textContent = 'Drum Kit: ' + (S.kitSel ? S.kitSel.slice(2) : 'Personalizado');
+  var b = $('#stBtn'); b.textContent = padOn ? '■' : '▶'; b.classList.toggle('playing', padOn);
+}
+function famList() { return CAT.pads.slice().sort(byName); }
+function famStep(d) {
+  var l = famList(), i = l.findIndex(function (f) { return f.id === S.family; });
+  setFamily(l[(i + d + l.length) % l.length].id);
 }
 var famCat = null;
 var byName = function (a, b) { return String(a.name || a).localeCompare(String(b.name || b), 'pt-BR', { numeric: true, sensitivity: 'base' }); };
 function renderFams() {
+  var fs = $('#famSel');
+  if (fs) {
+    if (!fs.options.length) famList().forEach(function (f) { var o = el('option', null, f.name); o.value = f.id; fs.appendChild(o); });
+    fs.value = S.family;
+  }
+  renderStatus();
   var cats = []; CAT.pads.forEach(function (f) { if (cats.indexOf(f.category) < 0) cats.push(f.category); });
   cats.sort(byName);
   if (!famCat) famCat = FAM[S.family] ? FAM[S.family].category : cats[0];
@@ -273,7 +294,7 @@ function getDrumBuffer(id) {
 function preloadKit() { S.kit.forEach(function (id) { getDrumBuffer(id); }); }
 function trigger(i, buf, vel) {
   var src = ctx.createBufferSource(); src.buffer = buf;
-  var g = ctx.createGain(); g.gain.value = clamp(vel, 0.05, 1);
+  var g = ctx.createGain(); g.gain.value = clamp(vel, 0.05, 1) * (S.dvol[i] == null ? 1 : S.dvol[i]);
   src.connect(g); g.connect(A.drumBus); src.start();
   var p = $('#drumGrid').children[i];
   if (p) { p.classList.add('hit'); setTimeout(function () { p.classList.remove('hit'); }, 90); }
@@ -294,6 +315,8 @@ function renderDrums() {
     g.appendChild(p);
   });
   $('#tab-drums').classList.toggle('editing', drumEditing);
+  g.classList.toggle('has16', S.kit.slice(8).some(Boolean));
+  renderDvols(); renderStatus();
   var sel = $('#kitSel'); sel.innerHTML = '';
   var g1 = document.createElement('optgroup'); g1.label = 'Kits prontos';
   FACTORY_KITS.forEach(function (k) { var o = el('option', null, k.name); o.value = 'f:' + k.name; g1.appendChild(o); });
@@ -307,6 +330,21 @@ function renderDrums() {
   var cur = kitList().indexOf(S.kitSel) >= 0 ? S.kitSel : '';
   sel.value = cur;
   if (!cur) { var o0 = el('option', null, 'Personalizado'); o0.value = ''; sel.insertBefore(o0, sel.firstChild); sel.value = ''; }
+}
+function renderDvols() {
+  var box = $('#dvols'); if (!box) return; box.innerHTML = '';
+  S.kit.forEach(function (id, i) {
+    if (!id) return;
+    var m = drumMeta(id);
+    var w = el('div', 'dv');
+    var top = el('div', 'dvt'); top.appendChild(el('b', null, m ? m.name : id));
+    var o = el('output', null, Math.round(S.dvol[i] * 100) + '%'); top.appendChild(o);
+    var r = document.createElement('input'); r.type = 'range'; r.min = 0; r.max = 1; r.step = 0.01; r.value = S.dvol[i];
+    r.setAttribute('aria-label', 'Volume ' + (m ? m.name : 'pad ' + (i + 1)));
+    r.oninput = function () { S.dvol[i] = parseFloat(r.value); o.textContent = Math.round(S.dvol[i] * 100) + '%'; save(); };
+    w.appendChild(top); w.appendChild(r); box.appendChild(w);
+  });
+  box.classList.toggle('hidden', !box.children.length);
 }
 function kitList() {
   return FACTORY_KITS.map(function (k) { return 'f:' + k.name; }).concat(Object.keys(S.drumSets).map(function (n) { return 'u:' + n; }));
@@ -566,6 +604,7 @@ function bindSets() {
     var n = $('#setName').value.trim(); if (!n) { toast('Dê um nome ao kit'); return; }
     S.drumSets[n] = S.kit.slice(); S.kitSel = 'u:' + n; save(); renderDrums(); $('#setName').value = ''; toast('Kit salvo');
   };
+  $('#famSel').onchange = function () { setFamily(this.value); };
   $('#kitSel').onchange = function () { if (this.value) applyKit(this.value); };
   $('#setDel').onclick = function () {
     var v = S.kitSel; if (!v || v[0] !== 'u') { toast('Selecione um kit seu para excluir'); return; }
@@ -595,6 +634,8 @@ function doAction(a, vel) {
   else if (a === 'met:tap') tapTempo();
   else if (a === 'song:next') songStep(1);
   else if (a === 'song:prev') songStep(-1);
+  else if (a === 'fam:next') famStep(1);
+  else if (a === 'fam:prev') famStep(-1);
   else if (a === 'kit:next') kitStep(1);
   else if (a === 'kit:prev') kitStep(-1);
 }
@@ -602,7 +643,7 @@ function actionName(a) {
   var p = a.split(':');
   if (p[0] === 'drum') return 'Drum pad ' + (parseInt(p[1], 10) + 1);
   if (p[0] === 'padkey') return 'Pad tom ' + LABEL[p[1]];
-  return { 'pad:toggle': 'Pad tocar/parar', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior' }[a] || a;
+  return { 'pad:toggle': 'Pad tocar/parar', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior' }[a] || a;
 }
 
 /* ---------- MIDI ---------- */
