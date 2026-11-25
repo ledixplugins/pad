@@ -718,6 +718,9 @@ function bindUI() {
   });
   // offline
   $('#btnOffline').onclick = downloadAll;
+  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) {
+    document.addEventListener(ev, function () { if (ctx && ctx.state !== 'running') ctx.resume(); }, true);
+  });
   document.addEventListener('visibilitychange', function () { if (!document.hidden && ctx && ctx.state !== 'running') ctx.resume(); });
 }
 
@@ -743,19 +746,14 @@ function downloadAll() {
 function boot() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
   loadCatalog().then(function () {
-    $('#startMsg').textContent = CAT.pads.length + ' pads · ' + CAT.drums.length + ' sons de bateria/efeitos';
     renderFams(); renderKeys(); renderPadBtn(); bindFx(); renderFx(); bindSets(); bindSetlist(); bindMidi(); renderMidiMap();
     bindMetro(); renderSongs(); renderSongNow(); bindUI();
     loadUserSamples().then(renderDrums);
     renderDrums();
-    $('#btnStart').onclick = function () {
-      var b = $('#btnStart'); b.disabled = true; b.textContent = 'Carregando…';
-      initAudio(); ctx.resume();
-      Promise.all([loadClicks(), Promise.all(S.kit.map(getDrumBuffer))]).then(function () {
-        $('#start').classList.add('hidden'); initMidi(); prefetchFamily(S.family);
-      });
-    };
-  }).catch(function (e) { $('#startMsg').textContent = 'Erro ao carregar o catálogo.'; console.error(e); });
+    // áudio pronto desde a abertura (fica suspenso até o primeiro toque, regra do navegador)
+    initAudio();
+    loadClicks(); preloadKit(); prefetchFamily(S.family); initMidi();
+  }).catch(function (e) { toast('Erro ao carregar o catálogo'); console.error(e); });
 }
 boot();
 })();
