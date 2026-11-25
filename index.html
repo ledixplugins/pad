@@ -70,9 +70,9 @@
 </section>
 
 <!-- DRUMS -->
-<section id="tab-drums" class="tab">
+<section id="tab-drums" class="tab" data-sv="pads">
   <div class="row between wrap gap">
-    <h2>Drum pads</h2>
+    <div class="stseg sv" role="tablist"><button class="on" data-sv="pads">Pads</button><button data-sv="vols">Volumes</button><button data-sv="kits">Kits</button></div>
     <div class="row gap wrap">
       <button id="drumEdit" class="toggle">✎ Editar pads</button>
       <label class="mini">Volume <input type="range" id="drumVol" min="0" max="1" step="0.01" value="0.9"></label>
@@ -200,21 +200,23 @@
 </section>
 
 <!-- MIDI -->
-<section id="tab-midi" class="tab">
-  <h2>Controle MIDI</h2>
-  <div class="card">
+<section id="tab-midi" class="tab" data-sv="ctl">
+  <div class="row between">
+    <div class="stseg sv" role="tablist"><button class="on" data-sv="ctl">Controlador</button><button data-sv="map">Mapa</button></div>
+  </div>
+  <div class="card" data-v="ctl">
     <div id="midiStatus">Verificando MIDI…</div>
     <small class="muted">Funciona com controladores USB e Bluetooth MIDI quando o navegador oferece Web MIDI (Chrome/Edge no computador e no Android). O Safari do iPad não oferece Web MIDI.</small>
   </div>
-  <div class="card">
+  <div class="card" data-v="ctl">
     <div class="row gap wrap">
       <button id="midiLearn" class="toggle">Mapear controles</button>
       <button id="midiReset">Restaurar padrão</button>
       <small id="midiHint" class="muted">Ative, toque num botão do app e depois numa tecla/pad do controlador.</small>
     </div>
     <p class="muted" style="margin:10px 0 0">Padrão: notas 36–51 tocam os 16 drum pads; notas 60–71 trocam o tom do pad (C a B).</p>
-    <div id="midiMap" class="midimap"></div>
   </div>
+  <div class="card" data-v="map"><div id="midiMap" class="midimap"></div></div>
 </section>
 
 </main>

@@ -731,10 +731,17 @@ function bindUI() {
       $$('#tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
       var live = b.dataset.tab === 'live';
       document.body.classList.toggle('live', live);
-      document.body.classList.toggle('stage', b.dataset.tab === 'fx');
+      document.body.classList.toggle('stage', !live);
       $$('.tab').forEach(function (t) {
         t.classList.toggle('on', live ? (t.id === 'tab-pads' || t.id === 'tab-drums') : t.id === 'tab-' + b.dataset.tab);
       });
+    };
+  });
+  $$('.stseg.sv').forEach(function (g) {
+    g.onclick = function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      $$('button', g).forEach(function (x) { x.classList.toggle('on', x === b); });
+      g.closest('.tab').dataset.sv = b.dataset.sv;
     };
   });
   (function () { var b = $('#tabs button.on'); if (b) b.onclick(); })();

@@ -497,3 +497,137 @@ body.stage .tab.on>*{margin:0}
   .console .timbre{gap:4px}
   .console .timbre button{width:38px}
 }
+
+/* =====================================================================
+   PADRONIZAÇÃO — todas as abas: sem rolagem, mesmo seletor, mesma barra de topo
+   ===================================================================== */
+/* seletor ◀ nome ▶ igual em todas as abas */
+.bar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;gap:0;align-items:center;padding:0;overflow:hidden;position:relative;background:var(--s1);border-radius:var(--r-md)}
+.bar .lbl{display:block;grid-column:2;grid-row:1;width:auto;align-self:end;padding:8px 4px 0 6px;font-size:11px;line-height:1;color:var(--muted);font-weight:500;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar select{grid-column:2;grid-row:2;align-self:start;width:100%;min-width:0;border:0;background-color:transparent;border-radius:0;box-shadow:none;padding:2px 24px 9px 6px;font-size:clamp(15px,2.1vh,18px);font-weight:600;line-height:1.25;text-overflow:ellipsis;text-align:left;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%238e8e93' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
+.bar button{grid-row:1 / span 2;width:44px;height:100%;min-width:44px;min-height:44px;border-radius:0;background:transparent;box-shadow:none;border:0;font-size:15px;color:var(--muted);flex:none}
+.bar button:first-of-type{grid-column:1;border-right:1px solid rgba(255,255,255,.07)}
+.bar button:last-of-type{grid-column:3;border-left:1px solid rgba(255,255,255,.07)}
+.bar button:active{background:rgba(255,255,255,.1);color:var(--txt)}
+@media(max-width:600px){.bar button{width:36px;min-width:36px;font-size:13px}.bar select{font-size:15px;padding-right:16px}}
+
+/* barra de topo da aba: ações à direita, sem título repetido (o nome já está na navegação) */
+body.stage .tab>h2,body.stage .tab>.row.between>h2{display:none}
+body.stage .tab>.row.between{flex:none;min-height:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:10px}
+body.stage .tab>.row.between>.row{flex-wrap:nowrap;gap:10px;margin-left:auto;align-items:center}
+body.stage .tab>.row.between button{min-height:40px;padding:8px 16px}
+body.stage .stseg{flex:none}
+body.stage .mini{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+body.stage .mini input{width:110px}
+body.stage .card{border-radius:var(--r-md)}
+body.stage .padbar,body.stage .status{display:none}
+body.stage .tab.on{overflow:hidden}
+
+/* --- Pads --- */
+body.stage #tab-pads .keys{flex:1 1 0;min-height:0;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:8px}
+body.stage #tab-pads .key{height:auto;min-height:0;font-size:clamp(17px,3vh,26px)}
+body.stage #tab-pads .sliders{flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 16px}
+body.stage #tab-pads .sliders label{min-width:0;font-size:12px;gap:0}
+body.stage #tab-pads .sliders input[type=range]{height:24px}
+body.stage #famCats{flex:none;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:6px}
+body.stage #famCats::-webkit-scrollbar{display:none}
+body.stage #famCats button{min-height:32px;padding:5px 14px;font-size:13px;flex:none}
+body.stage #fams{flex:0 1 auto;min-height:0;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;overflow:hidden auto;scrollbar-width:none;align-content:start}
+body.stage #fams::-webkit-scrollbar{display:none}
+body.stage .fam{padding:8px 12px;font-size:14px;min-height:0}
+body.stage .fam small{font-size:11px;margin-top:0}
+@media(orientation:landscape) and (min-width:700px){
+  body.stage #tab-pads.on{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;gap:10px 14px;
+    grid-template-areas:"hd hd" "keys cats" "keys fams" "sl fams"}
+  body.stage #tab-pads>.row.between{grid-area:hd}
+  body.stage #tab-pads>.keys{grid-area:keys}
+  body.stage #tab-pads>.sliders{grid-area:sl}
+  body.stage #tab-pads>#famCats{grid-area:cats}
+  body.stage #tab-pads>#fams{grid-area:fams;align-self:stretch}
+  body.stage #tab-pads .sliders{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* --- Drums --- */
+body.stage #tab-drums .kitbar{flex:none}
+body.stage #tab-drums #drumGrid{flex:1 1 0;min-height:0;grid-auto-rows:minmax(0,1fr);gap:8px}
+body.stage #tab-drums #drumGrid:not(.has16){grid-template-rows:repeat(2,minmax(0,1fr))}
+body.stage #tab-drums #drumGrid.has16{grid-template-rows:repeat(4,minmax(0,1fr))}
+body.stage #tab-drums #drumGrid:not(.has16) .dpad:nth-child(n+9){display:none}
+body.stage #tab-drums .dpad{aspect-ratio:auto;min-height:0;overflow:hidden;align-items:flex-start;justify-content:flex-start;text-align:left;padding:clamp(8px,1.6vh,14px);font-size:clamp(12px,1.5vw + .5vh,16px);font-weight:600}
+body.stage #tab-drums .dpad b{font-weight:500}
+body.stage #tab-drums .dpad span{text-wrap:wrap}
+/* abas internas */
+body.stage #tab-drums[data-sv="pads"] #dvols,body.stage #tab-drums[data-sv="pads"]>.card,
+body.stage #tab-drums[data-sv="vols"] #drumGrid,body.stage #tab-drums[data-sv="vols"]>.card:not(.dvols),
+body.stage #tab-drums[data-sv="kits"] #drumGrid,body.stage #tab-drums[data-sv="kits"] #dvols{display:none!important}
+body.stage #tab-drums[data-sv="vols"] #dvols{display:grid;flex:1 1 0;min-height:0;align-content:center;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 22px;padding:16px 18px}
+body.stage #tab-drums[data-sv="vols"] #dvols.hidden{display:none!important}
+body.stage #tab-drums[data-sv="kits"]>.card{flex:none}
+body.stage #tab-drums[data-sv="kits"]>.card input#setName{flex:1 1 200px;min-width:0}
+body.stage #tab-drums[data-sv="vols"] .dv input[type=range]{height:24px}
+
+/* --- Metrônomo --- */
+body.stage #tab-metro .bpm-box{flex:1 1 0;min-height:0;flex-wrap:nowrap;padding:0;gap:clamp(10px,2vw,22px)}
+body.stage #tab-metro .bpm input{font-size:clamp(56px,13vh,96px);width:clamp(120px,22vh,190px)}
+body.stage #tab-metro .tap{width:clamp(76px,16vh,112px);height:clamp(76px,16vh,112px)}
+body.stage #tab-metro .round{width:clamp(44px,8vh,56px);height:clamp(44px,8vh,56px)}
+body.stage #tab-metro .wide{flex:none;margin:0}
+body.stage #tab-metro .beats{flex:none;margin:0;gap:12px}
+body.stage #tab-metro .fxgrid{flex:none;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px 18px;padding:12px 16px}
+body.stage #tab-metro .fxgrid label{min-width:0}
+body.stage #tab-metro .fxgrid select{min-height:40px;padding-top:8px;padding-bottom:8px}
+
+/* --- Setlist --- */
+body.stage #tab-setlist>.card{flex:none}
+body.stage #tab-setlist .songs{flex:1 1 0;min-height:0;overflow:hidden auto;scrollbar-width:none}
+body.stage #tab-setlist .songs::-webkit-scrollbar{display:none}
+body.stage #tab-setlist>.row.gap{flex:none;justify-content:flex-start}
+body.stage #tab-setlist>.row.between+.card .row{flex-wrap:nowrap}
+body.stage #tab-setlist .card small{display:block;margin-top:6px}
+
+/* --- MIDI --- */
+body.stage #tab-midi[data-sv="ctl"]>.card[data-v="map"],body.stage #tab-midi[data-sv="map"]>.card[data-v="ctl"]{display:none}
+body.stage #tab-midi>.card{flex:none}
+body.stage #tab-midi[data-sv="map"]>.card[data-v="map"]{flex:1 1 0;min-height:0;overflow:hidden auto;scrollbar-width:none;padding:12px}
+body.stage #tab-midi[data-sv="map"]>.card[data-v="map"]::-webkit-scrollbar{display:none}
+body.stage .midimap{margin-top:0;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 8px;font-size:13px}
+body.stage .mm{padding:5px 10px;min-height:34px}
+@media(max-width:600px){body.stage .midimap{grid-template-columns:repeat(2,minmax(0,1fr));font-size:12px}body.stage .mm{padding:4px 8px}}
+
+/* --- celular deitado (altura pequena) --- */
+@media(orientation:landscape) and (max-height:480px){
+  body.stage .tab.on{gap:6px}
+  body.stage main{padding-top:6px;padding-bottom:calc(8px + var(--safe-b))}
+  body.stage .tab>.row.between button{min-height:34px;padding:4px 14px}
+  body.stage #tab-metro .bpm-box{gap:12px}
+  body.stage #tab-metro .beats{display:none}
+}
+
+/* ajustes de padronização para telas pequenas */
+@media(max-width:600px){
+  body.stage #tab-drums>.row.between{flex-wrap:wrap}
+  body.stage #tab-drums>.row.between>.row{margin-left:0;width:100%;justify-content:space-between}
+  body.stage #tab-drums .mini{flex:1}body.stage #tab-drums .mini input{width:100%}
+  body.stage #tab-setlist>.row.between+.card .row{flex-wrap:wrap}
+  body.stage #tab-setlist input#songTitle{flex:1 1 100%}
+  body.stage #tab-metro .fxgrid label.check{grid-column:1 / -1;white-space:nowrap}
+}
+@media(max-height:700px){
+  #stFx .card h3,#stFx .card p.muted{display:none}
+}
+@media(max-height:480px){
+  body.stage #tab-midi small.muted,body.stage #tab-midi p.muted{display:none}
+  body.stage #tab-midi>.card{padding:10px 14px}
+  body.stage #tab-drums[data-sv="vols"] #dvols{gap:0 18px;padding:6px 12px}
+  body.stage .dv .dvt{margin-bottom:0}
+  .board{min-height:96px}
+  .console{padding:6px 12px}
+}
+#stFx,body.stage #tab-drums[data-sv="vols"] #dvols{overflow-y:auto;scrollbar-width:none}
+#stFx::-webkit-scrollbar,body.stage #tab-drums[data-sv="vols"] #dvols::-webkit-scrollbar{display:none}
+@media(max-width:600px){
+  body.stage #tab-drums[data-sv="vols"] #dvols{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px;padding:10px 12px}
+  body.stage #tab-drums[data-sv="vols"] .dv input[type=range]{height:20px}
+  body.stage .dv .dvt{font-size:12px;margin-bottom:0}
+}
