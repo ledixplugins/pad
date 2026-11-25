@@ -26,6 +26,7 @@ function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
 var DEF = {
   family: 'shimmer', key: 'C', padVol: 0.8, padFade: 4, padLoop: 5, drumVol: 0.9, masterVol: 0.9,
   fx: { cut: 1, pan: 0, low: 0, high: 0, rev: 0.25, comp: false, th: -24, ra: 4 },
+  family2: '', mix2: 0.5, lists: {}, listName: 'Setlist 1',
   bpm: 72, sig: 4, click: 'classic', metVol: 0.7, accent: true,
   kit: DEFAULT_KIT.slice(), dvol: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], kitSel: 'f:Worship Drums', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
 };
@@ -73,6 +74,7 @@ function initAudio() {
   A.mix.connect(A.lim); A.lim.connect(A.master); A.master.connect(ctx.destination);
 
   A.padBus = ctx.createGain();
+  A.l1 = ctx.createGain(); A.l2 = ctx.createGain(); A.l1.connect(A.padBus); A.l2.connect(A.padBus);
   A.lp = ctx.createBiquadFilter(); A.lp.type = 'lowpass'; A.lp.Q.value = 0.7;
   A.pan = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
   A.low = ctx.createBiquadFilter(); A.low.type = 'lowshelf'; A.low.frequency.value = 200;
@@ -102,7 +104,9 @@ function set(param, v, tc) { param.setTargetAtTime(v, ctx.currentTime, tc || 0.0
 function applyAll() {
   if (!ctx) return;
   set(A.master.gain, S.masterVol);
-  set(A.padBus.gain, S.padVol);
+  set(A.padBus.gain, duckOn ? S.padVol * 0.18 : S.padVol, duckOn ? 0.12 : 0.4);
+  var m2 = S.family2 ? clamp(S.mix2, 0, 1) : 0;
+  set(A.l1.gain, Math.cos(m2 * Math.PI / 2)); set(A.l2.gain, Math.sin(m2 * Math.PI / 2));
   set(A.drumBus.gain, S.drumVol);
   set(A.metBus.gain, S.metVol);
   var f = S.fx;
@@ -124,6 +128,7 @@ function fetchBuf(url) {
 var CURVE_N = 96, CURVE_IN = new Float32Array(CURVE_N), CURVE_OUT = new Float32Array(CURVE_N);
 for (var ci = 0; ci < CURVE_N; ci++) { var ph = ci / (CURVE_N - 1) * Math.PI / 2; CURVE_IN[ci] = Math.sin(ph); CURVE_OUT[ci] = Math.cos(ph); }
 
+var duckOn = false;
 var padBufs = new Map(), padLoading = {};
 function getPadBuffer(fam, note) {
   var k = fam + '/' + note;
@@ -132,7 +137,7 @@ function getPadBuffer(fam, note) {
   var url = FAM[fam].files[note];
   padLoading[k] = fetchBuf(url).then(function (buf) {
     delete padLoading[k]; padBufs.set(k, buf);
-    while (padBufs.size > 4) padBufs.delete(padBufs.keys().next().value);
+    while (padBufs.size > 8) padBufs.delete(padBufs.keys().next().value);
     return buf;
   }, function (e) { delete padLoading[k]; throw e; });
   return padLoading[k];
@@ -145,12 +150,12 @@ function prefetchFamily(fam) {
   (function next(i) { if (i >= list.length) return; fetch(list[i]).then(function (r) { return r.arrayBuffer(); }).catch(function () {}).then(function () { next(i + 1); }); })(0);
 }
 
-function Stream(buf, fadeIn, loopX) {
+function Stream(buf, fadeIn, loopX, dest) {
   this.buf = buf;
   this.X = clamp(loopX, 1, buf.duration / 2 - 0.5);
   this.out = ctx.createGain();
   this.out.gain.value = 0;
-  this.out.connect(A.padBus);
+  this.out.connect(dest || A.l1);
   this.insts = []; this.timer = null; this.dead = false;
   var t = ctx.currentTime + 0.03;
   this.out.gain.setValueAtTime(0, t);
@@ -192,23 +197,26 @@ Stream.prototype.stop = function (fadeOut) {
   }, fadeOut * 1000 + 300);
 };
 
-var padOn = false, padNote = null, padStream = null, padReq = 0, padLoadingNote = null;
+var padOn = false, padNote = null, padStream = null, padStream2 = null, padReq = 0, padLoadingNote = null;
 function padStart() {
   if (!ctx) return;
-  var req = ++padReq, fam = S.family, note = S.key;
+  var req = ++padReq, fam = S.family, fam2 = FAM[S.family2] ? S.family2 : '', note = S.key;
   padLoadingNote = note; renderKeys();
-  prefetchFamily(fam);
-  return getPadBuffer(fam, note).then(function (buf) {
+  prefetchFamily(fam); if (fam2) prefetchFamily(fam2);
+  return Promise.all([getPadBuffer(fam, note), fam2 ? getPadBuffer(fam2, note) : null]).then(function (b) {
     if (req !== padReq) return;
-    var old = padStream;
-    padStream = new Stream(buf, S.padFade, S.padLoop);
-    if (old) old.stop(S.padFade);
+    var old = padStream, old2 = padStream2;
+    padStream = new Stream(b[0], S.padFade, S.padLoop, A.l1);
+    padStream2 = b[1] ? new Stream(b[1], S.padFade, S.padLoop, A.l2) : null;
+    if (old) old.stop(S.padFade); if (old2) old2.stop(S.padFade);
     padOn = true; padNote = note; padLoadingNote = null; renderKeys(); renderPadBtn();
   }).catch(function (e) { padLoadingNote = null; renderKeys(); toast('Não consegui carregar o pad'); console.error(e); });
 }
 function padStop(fade) {
   padReq++; padOn = false; padNote = null; padLoadingNote = null;
-  if (padStream) { padStream.stop(fade == null ? S.padFade : fade); padStream = null; }
+  var f = fade == null ? S.padFade : fade;
+  if (padStream) { padStream.stop(f); padStream = null; }
+  if (padStream2) { padStream2.stop(f); padStream2 = null; }
   renderKeys(); renderPadBtn();
 }
 function padKeyTap(note) {
@@ -217,6 +225,18 @@ function padKeyTap(note) {
   else if (note === padNote) padStop();
   else padStart();
   renderKeys();
+}
+function keyShift(d) {
+  var i = NOTES.indexOf(S.key); S.key = NOTES[(i + d + 12 * 4) % 12]; save();
+  if (padOn) padStart(); renderKeys(); toast('Tom: ' + LABEL[S.key]);
+}
+function duckToggle() { duckOn = !duckOn; $$('[data-action="pad:duck"]').forEach(function (b) { b.classList.toggle('on', duckOn); }); applyAll(); }
+function setLayer2(id) { S.family2 = id || ''; save(); renderLayer(); applyAll(); if (padOn) padStart(); }
+function renderLayer() {
+  var s = $('#fam2Sel'); if (!s) return;
+  if (s.options.length < 2) { var o0 = el('option', null, 'Sem camada 2'); o0.value = ''; s.appendChild(o0); famList().forEach(function (f) { var o = el('option', null, f.name); o.value = f.id; s.appendChild(o); }); }
+  s.value = S.family2 || ''; $('#mix2').value = S.mix2; $('#mix2').disabled = !S.family2;
+  $('#mix2O').textContent = S.family2 ? Math.round(S.mix2 * 100) + '%' : '—';
 }
 function padToggle() { if (padOn) padStop(); else padStart(); }
 function setFamily(id) {
@@ -592,7 +612,9 @@ function loadSong(i) {
   S.songIdx = i; S.key = s.key; if (FAM[s.family]) S.family = s.family;
   if (s.fade != null) { if (S.baseFade == null) S.baseFade = S.padFade; S.padFade = s.fade; } else if (S.baseFade != null) { S.padFade = S.baseFade; S.baseFade = null; }
   if (s.kit && kitList().indexOf(s.kit) >= 0 && s.kit !== S.kitSel) applyKit(s.kit, true);
-  setBpm(s.bpm); save();
+  if (s.fx) { S.fx = Object.assign(JSON.parse(JSON.stringify(DEF.fx)), s.fx); renderFx(); }
+  if (s.family2 !== undefined) { S.family2 = FAM[s.family2] ? s.family2 : ''; if (s.mix2 != null) S.mix2 = s.mix2; renderLayer(); }
+  applyAll(); setBpm(s.bpm); save();
   renderKeys(); renderFams(); renderSongs(); renderSongNow();
   if (padOn && ctx) padStart();
   var nx = S.setlist[i + 1]; if (nx && FAM[nx.family] && ctx) prefetchFamily(nx.family);
@@ -606,7 +628,7 @@ function songStep(d) {
 function bindSetlist() {
   $('#songAdd').onclick = function () {
     var t = $('#songTitle').value.trim() || ('Música ' + (S.setlist.length + 1));
-    S.setlist.push({ title: t.slice(0, 60), key: S.key, family: S.family, bpm: S.bpm, kit: S.kitSel });
+    S.setlist.push({ title: t.slice(0, 60), key: S.key, family: S.family, bpm: S.bpm, kit: S.kitSel, fx: JSON.parse(JSON.stringify(S.fx)), family2: S.family2, mix2: S.mix2 });
     $('#songTitle').value = ''; save(); renderSongs(); toast('Música salva');
   };
   $('#slExport').onclick = function () { download('aurapad-setlist.json', JSON.stringify({ setlist: S.setlist }, null, 1)); };
@@ -614,7 +636,7 @@ function bindSetlist() {
     var f = e.target.files[0]; if (!f) return;
     f.text().then(function (t) {
       var j = JSON.parse(t); if (!Array.isArray(j.setlist)) throw 0;
-      S.setlist = j.setlist.map(function (s) { return { title: String(s.title || '').slice(0, 60), key: NOTES.indexOf(s.key) >= 0 ? s.key : 'C', family: s.family, bpm: clamp(parseInt(s.bpm, 10) || 72, 30, 260), kit: typeof s.kit === 'string' ? s.kit : '', notes: typeof s.notes === 'string' ? s.notes.slice(0, 4000) : '', fade: isFinite(s.fade) ? clamp(+s.fade, 1, 12) : undefined }; });
+      S.setlist = j.setlist.map(function (s) { return { title: String(s.title || '').slice(0, 60), key: NOTES.indexOf(s.key) >= 0 ? s.key : 'C', family: s.family, bpm: clamp(parseInt(s.bpm, 10) || 72, 30, 260), kit: typeof s.kit === 'string' ? s.kit : '', notes: typeof s.notes === 'string' ? s.notes.slice(0, 4000) : '', fade: isFinite(s.fade) ? clamp(+s.fade, 1, 12) : undefined, fx: s.fx && typeof s.fx === 'object' ? s.fx : undefined, family2: typeof s.family2 === 'string' ? s.family2 : undefined, mix2: isFinite(s.mix2) ? clamp(+s.mix2, 0, 1) : undefined }; });
       S.songIdx = -1; save(); renderSongs(); renderSongNow(); toast('Setlist importada');
     }).catch(function () { toast('Arquivo inválido'); }); e.target.value = '';
   };
@@ -656,6 +678,8 @@ function doAction(a, vel) {
   if (p[0] === 'drum') playDrum(parseInt(p[1], 10), vel);
   else if (p[0] === 'padkey') padKeyTap(p[1]);
   else if (a === 'pad:toggle') padToggle();
+  else if (a === 'pad:duck') duckToggle();
+  else if (p[0] === 'key') keyShift(parseInt(p[1], 10));
   else if (a === 'met:toggle') { if (metOn) metStop(); else metStart(); }
   else if (a === 'met:tap') tapTempo();
   else if (a === 'song:next') songStep(1);
@@ -669,7 +693,7 @@ function actionName(a) {
   var p = a.split(':');
   if (p[0] === 'drum') return 'Drum pad ' + (parseInt(p[1], 10) + 1);
   if (p[0] === 'padkey') return 'Pad tom ' + LABEL[p[1]];
-  return { 'pad:toggle': 'Pad tocar/parar', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior' }[a] || a;
+  return { 'pad:toggle': 'Pad tocar/parar', 'pad:duck': 'Pad abaixar (voz)', 'key:1': 'Subir 1 semitom', 'key:-1': 'Descer 1 semitom', 'key:2': 'Subir 1 tom', 'key:-2': 'Descer 1 tom', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior' }[a] || a;
 }
 
 /* ---------- MIDI ---------- */
@@ -699,6 +723,7 @@ function renderMidiMap() {
 function onMidi(e) {
   if (!armed && window.StageLab && StageLab.midi(e)) return;
   var d = e.data, st = d[0] & 0xf0, n = d[1], v = d[2];
+  var ml = $('#midiLast'); if (ml && d[0] < 0xf0) ml.textContent = 'Última mensagem: ' + ({ 0x90: 'Nota ligada', 0x80: 'Nota desligada', 0xb0: 'CC', 0xc0: 'Program Change', 0xe0: 'Pitch bend', 0xd0: 'Aftertouch', 0xa0: 'Aftertouch de tecla' }[st] || 'MIDI') + ' ' + n + (d.length > 2 ? ' · valor ' + v : '') + ' · canal ' + ((d[0] & 15) + 1);
   if (st === 0xc0 && !armed) { if (S.setlist[n]) loadSong(n); return; }   // Program Change N = música N+1
   var key = null, on = false;
   if (st === 0x90 && v > 0) { key = 'note:' + n; on = true; }
@@ -741,6 +766,43 @@ function bindMidi() {
   document.addEventListener('click', capture, true);
 }
 
+
+
+/* ---------- palco: camada 2, duck, tom ---------- */
+function bindLive() {
+  renderLayer();
+  $('#fam2Sel').onchange = function () { setLayer2(this.value); };
+  $('#mix2').addEventListener('input', function (e) { S.mix2 = parseFloat(e.target.value); renderLayer(); applyAll(); save(); });
+}
+/* ---------- várias setlists ---------- */
+function renderLists() {
+  var s = $('#listSel'); s.innerHTML = '';
+  Object.keys(S.lists).forEach(function (n) { var o = el('option', null, n); o.value = n; s.appendChild(o); });
+  s.value = S.listName;
+}
+function switchList(name) {
+  if (!S.lists[name]) return;
+  S.lists[S.listName] = S.setlist; S.listName = name; S.setlist = S.lists[name]; S.songIdx = -1;
+  save(); renderLists(); renderSongs(); renderSongNow();
+}
+function bindLists() {
+  if (!S.lists[S.listName]) S.lists[S.listName] = S.setlist; else S.setlist = S.lists[S.listName];
+  renderLists();
+  $('#listSel').onchange = function () { switchList(this.value); };
+  $('#listNew').onclick = function () {
+    var n = prompt('Nome da nova setlist (por exemplo, Culto de domingo):', 'Setlist ' + (Object.keys(S.lists).length + 1)); if (!n) return; n = n.trim().slice(0, 40); if (!n || S.lists[n]) { toast('Nome inválido ou já existe'); return; }
+    S.lists[S.listName] = S.setlist; S.lists[n] = []; switchList(n);
+  };
+  $('#listRen').onclick = function () {
+    var n = prompt('Novo nome:', S.listName); if (!n) return; n = n.trim().slice(0, 40); if (!n || (n !== S.listName && S.lists[n])) { toast('Nome inválido ou já existe'); return; }
+    S.lists[S.listName] = S.setlist; S.lists[n] = S.setlist; if (n !== S.listName) delete S.lists[S.listName]; S.listName = n; save(); renderLists();
+  };
+  $('#listDel').onclick = function () {
+    var ks = Object.keys(S.lists); if (ks.length < 2) { toast('Mantenha ao menos uma setlist'); return; }
+    if (!confirm('Excluir a setlist "' + S.listName + '" e suas músicas?')) return;
+    delete S.lists[S.listName]; var n = Object.keys(S.lists)[0]; S.listName = n; S.setlist = S.lists[n]; S.songIdx = -1; save(); renderLists(); renderSongs(); renderSongNow();
+  };
+}
 
 /* ---------- backup, tela ligada, travar toques ---------- */
 function bindSafety() {
@@ -859,7 +921,7 @@ function boot() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
   loadCatalog().then(function () {
     renderFams(); renderKeys(); renderPadBtn(); bindFx(); renderFx(); bindSets(); bindSetlist(); bindMidi(); renderMidiMap();
-    bindMetro(); renderSongs(); renderSongNow(); bindUI(); bindSafety();
+    bindMetro(); bindLive(); bindLists(); renderSongs(); renderSongNow(); bindUI(); bindSafety();
     loadUserSamples().then(renderDrums);
     renderDrums();
     // áudio pronto desde a abertura (fica suspenso até o primeiro toque, regra do navegador)

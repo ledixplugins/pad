@@ -61,6 +61,14 @@
     <div class="stline" id="stKit"></div>
     <button id="stBtn" class="stop" data-action="pad:toggle" aria-label="Tocar ou parar o pad"></button>
   </div>
+  <div class="row gap wrap live-extra">
+    <button data-action="key:-1" title="Descer 1 semitom">−½</button>
+    <button data-action="key:1" title="Subir 1 semitom">+½</button>
+    <button data-action="key:2" title="Subir 1 tom">+1</button>
+    <button data-action="pad:duck" class="toggle" title="Abaixar o pad para falar">Voz</button>
+    <select id="fam2Sel" aria-label="Camada 2 de pad"></select>
+    <input type="range" id="mix2" min="0" max="1" step="0.01" value="0.5" aria-label="Mistura da camada 2"><output id="mix2O">—</output>
+  </div>
   <div class="row gap wrap sliders">
     <label>Volume <input type="range" id="padVol" min="0" max="1" step="0.01" value="0.8"></label>
     <label>Troca de tom <output id="padFadeO">4 s</output><input type="range" id="padFade" min="0.5" max="12" step="0.5" value="4"></label>
@@ -190,7 +198,7 @@
 
 <!-- SETLIST -->
 <section id="tab-setlist" class="tab">
-  <div class="row between wrap gap"><h2>Setlist</h2>
+  <div class="row between wrap gap"><div class="row gap listbar"><select id="listSel" aria-label="Setlist"></select><button id="listNew" title="Nova setlist">＋</button><button id="listRen" title="Renomear setlist">✎</button><button id="listDel" class="danger" title="Excluir setlist">✕</button></div>
     <div class="row gap wrap">
       <button data-action="song:prev">◀ Anterior</button>
       <button data-action="song:next">Próxima ▶</button>
@@ -224,6 +232,7 @@
     <div class="row gap wrap">
       <button id="midiLearn" class="toggle">Mapear controles</button>
       <button id="midiReset">Restaurar padrão</button>
+      <small id="midiLast" class="muted">Última mensagem: nenhuma ainda</small>
       <small id="midiHint" class="muted">Ative, toque num botão do app e depois numa tecla/pad do controlador.</small>
     </div>
     <p class="muted" style="margin:10px 0 0">Padrão: notas 36–51 tocam os 16 drum pads; notas 60–71 trocam o tom do pad (C a B).</p>

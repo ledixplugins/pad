@@ -749,3 +749,33 @@ body.stage .fam small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .notes{white-space:pre-wrap;font:inherit;font-size:clamp(18px,3vh,26px);line-height:1.5;max-height:60vh;overflow:auto;margin:10px 0 0;-webkit-overflow-scrolling:touch}
 .song-now{cursor:pointer}
 @media (max-width:400px){#btnLock{width:30px;min-width:30px;height:30px}}
+
+/* ===== palco extra, setlists ===== */
+.live-extra{align-items:center;gap:6px;flex-wrap:nowrap}
+.live-extra button{min-height:40px;padding:0 12px;border-radius:999px;font-size:14px;flex:none}
+.live-extra select{flex:1;min-width:0;font-size:14px;padding:8px 28px 8px 12px;border-radius:999px}
+.live-extra input[type=range]{width:90px;flex:none}
+.live-extra output{font-size:12px;color:var(--muted);min-width:30px}
+.listbar select{min-width:0;flex:1;font-size:15px;padding:8px 30px 8px 14px;border-radius:999px}
+.listbar button{width:38px;min-width:38px;height:38px;padding:0;border-radius:50%}
+#btnLock{align-self:center;height:36px}
+@media (max-width:480px){
+  .live-extra{gap:4px}
+  .live-extra button{padding:0;width:34px;min-width:34px;font-size:13px}
+  .live-extra button[data-action="pad:duck"]{width:42px;min-width:42px}
+  .live-extra select{min-width:78px;padding:8px 18px 8px 8px;font-size:12px}
+  .live-extra input[type=range]{width:48px}
+  .live-extra output{display:none}
+}
+#btnLock{height:36px!important;min-height:0!important;padding:0!important}
+@media (max-width:620px){
+  #tab-setlist > .row.gap.wrap:last-child{gap:6px}
+  #tab-setlist > .row.gap.wrap:last-child > button,#tab-setlist > .row.gap.wrap:last-child > .filebtn{flex:1 1 calc(50% - 6px);min-width:0;padding:0 8px;font-size:12px;min-height:34px;height:34px}
+  #tab-setlist .listbar{flex:1 1 100%}
+}
+@media (max-width:620px){
+  #tab-setlist > .row.between{flex-wrap:wrap;gap:6px}
+  #tab-setlist > .row.between > .row.gap.wrap{flex:1 1 100%;flex-wrap:nowrap}
+  #tab-setlist > .row.between > .row.gap.wrap > button{flex:1;min-width:0;height:36px;min-height:36px;padding:0 8px;font-size:13px}
+  #tab-setlist .listbar{flex-wrap:nowrap!important}
+}
