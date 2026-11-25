@@ -738,3 +738,14 @@ body.stage .fam small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .stbar2 button{height:30px;min-height:30px}
   .knob{width:30px}.pow{height:22px}.cname{min-height:28px;padding:3px 2px}
 }
+
+/* ===== segurança: travar toques, notas ===== */
+#lockLayer{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;touch-action:none}
+#lockLayer.hidden{display:none}
+#lockHold{position:relative;overflow:hidden;padding:18px 28px;font-size:18px;font-weight:600;border-radius:999px;background:var(--s2);color:#fff;user-select:none;-webkit-user-select:none}
+#lockHold::after{content:"";position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--amber)}
+#lockHold.go::after{width:100%;transition:width 1.5s linear}
+#btnLock{width:36px;min-width:36px;height:36px;padding:0;border-radius:50%;font-size:15px;flex:none}
+.notes{white-space:pre-wrap;font:inherit;font-size:clamp(18px,3vh,26px);line-height:1.5;max-height:60vh;overflow:auto;margin:10px 0 0;-webkit-overflow-scrolling:touch}
+.song-now{cursor:pointer}
+@media (max-width:400px){#btnLock{width:30px;min-width:30px;height:30px}}

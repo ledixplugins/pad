@@ -87,6 +87,7 @@ function initAudio() {
 
   A.drumBus = ctx.createGain(); A.drumBus.connect(A.mix);
   A.metBus = ctx.createGain(); A.metBus.connect(A.master);
+  ctx.onstatechange = function () { if (ctx.state !== 'running' && ctx.state !== 'closed') { ctx.resume().catch(function () {}); if (!document.hidden) toast('Áudio pausado pelo sistema. Toque na tela para retomar.'); } };
   applyAll();
 }
 function makeIR(sec, decay) {
@@ -558,13 +559,27 @@ function renderSongs() {
     var li = el('li', 'song' + (i === S.songIdx ? ' cur' : ''));
     var info = el('div', 'info'); info.appendChild(el('div', 't', (i + 1) + '. ' + s.title)); info.appendChild(el('div', 'm', songLabel(s)));
     info.onclick = function () { loadSong(i); };
+    var nt = el('button', null, s.notes ? '📝' : '＋'); nt.title = 'Notas, letra e fade desta música';
+    nt.onclick = function () { editSong(s); };
     var up = el('button', null, '↑'), dn = el('button', null, '↓'), rn = el('button', null, '✎'), rm = el('button', 'danger', '✕');
     up.onclick = function () { moveSong(i, -1); }; dn.onclick = function () { moveSong(i, 1); };
     rn.onclick = function () { var t = prompt('Título da música', s.title); if (t) { s.title = t.slice(0, 60); save(); renderSongs(); renderSongNow(); } };
     rm.onclick = function () { if (confirm('Remover "' + s.title + '"?')) { S.setlist.splice(i, 1); if (S.songIdx >= S.setlist.length) S.songIdx = S.setlist.length - 1; save(); renderSongs(); renderSongNow(); } };
-    li.appendChild(info); li.appendChild(up); li.appendChild(dn); li.appendChild(rn); li.appendChild(rm);
+    li.appendChild(info); li.appendChild(nt); li.appendChild(up); li.appendChild(dn); li.appendChild(rn); li.appendChild(rm);
     ol.appendChild(li);
   });
+}
+function editSong(s) {
+  var t = prompt('Notas ou letra desta música (aparecem ao tocar no nome da música, no topo):', s.notes || '');
+  if (t === null) return; s.notes = t.slice(0, 4000);
+  var f = prompt('Tempo de fade do pad nesta música, em segundos (1 a 12). Deixe vazio para usar o padrão:', s.fade != null ? s.fade : '');
+  if (f !== null) { f = parseFloat(String(f).replace(',', '.')); if (isFinite(f)) s.fade = clamp(f, 1, 12); else delete s.fade; }
+  save(); renderSongs(); toast('Música atualizada');
+}
+function showNotes() {
+  var s = S.setlist[S.songIdx]; if (!s) return;
+  $('#notesTitle').textContent = s.title; $('#notesText').textContent = s.notes || 'Sem notas. Use o botão ＋ na lista de músicas para adicionar letra ou anotações.';
+  $('#notesBox').classList.remove('hidden');
 }
 function moveSong(i, d) {
   var j = i + d; if (j < 0 || j >= S.setlist.length) return;
@@ -575,10 +590,12 @@ function moveSong(i, d) {
 function loadSong(i) {
   var s = S.setlist[i]; if (!s) return;
   S.songIdx = i; S.key = s.key; if (FAM[s.family]) S.family = s.family;
+  if (s.fade != null) { if (S.baseFade == null) S.baseFade = S.padFade; S.padFade = s.fade; } else if (S.baseFade != null) { S.padFade = S.baseFade; S.baseFade = null; }
   if (s.kit && kitList().indexOf(s.kit) >= 0 && s.kit !== S.kitSel) applyKit(s.kit, true);
   setBpm(s.bpm); save();
   renderKeys(); renderFams(); renderSongs(); renderSongNow();
   if (padOn && ctx) padStart();
+  var nx = S.setlist[i + 1]; if (nx && FAM[nx.family] && ctx) prefetchFamily(nx.family);
   toast(s.title);
 }
 function songStep(d) {
@@ -597,7 +614,7 @@ function bindSetlist() {
     var f = e.target.files[0]; if (!f) return;
     f.text().then(function (t) {
       var j = JSON.parse(t); if (!Array.isArray(j.setlist)) throw 0;
-      S.setlist = j.setlist.map(function (s) { return { title: String(s.title || '').slice(0, 60), key: NOTES.indexOf(s.key) >= 0 ? s.key : 'C', family: s.family, bpm: clamp(parseInt(s.bpm, 10) || 72, 30, 260), kit: typeof s.kit === 'string' ? s.kit : '' }; });
+      S.setlist = j.setlist.map(function (s) { return { title: String(s.title || '').slice(0, 60), key: NOTES.indexOf(s.key) >= 0 ? s.key : 'C', family: s.family, bpm: clamp(parseInt(s.bpm, 10) || 72, 30, 260), kit: typeof s.kit === 'string' ? s.kit : '', notes: typeof s.notes === 'string' ? s.notes.slice(0, 4000) : '', fade: isFinite(s.fade) ? clamp(+s.fade, 1, 12) : undefined }; });
       S.songIdx = -1; save(); renderSongs(); renderSongNow(); toast('Setlist importada');
     }).catch(function () { toast('Arquivo inválido'); }); e.target.value = '';
   };
@@ -682,6 +699,7 @@ function renderMidiMap() {
 function onMidi(e) {
   if (!armed && window.StageLab && StageLab.midi(e)) return;
   var d = e.data, st = d[0] & 0xf0, n = d[1], v = d[2];
+  if (st === 0xc0 && !armed) { if (S.setlist[n]) loadSong(n); return; }   // Program Change N = música N+1
   var key = null, on = false;
   if (st === 0x90 && v > 0) { key = 'note:' + n; on = true; }
   else if (st === 0xb0) { key = 'cc:' + n; on = v > 0; }
@@ -721,6 +739,38 @@ function bindMidi() {
   }
   document.addEventListener('pointerdown', capture, true);
   document.addEventListener('click', capture, true);
+}
+
+
+/* ---------- backup, tela ligada, travar toques ---------- */
+function bindSafety() {
+  $('#bkExport').onclick = function () {
+    var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    download('aurapad-backup-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '.json', JSON.stringify({ aurapad: 1, state: S }, null, 1));
+    toast('Backup salvo (setlist, kits, StageLab e vínculos MIDI)');
+  };
+  $('#bkImport').onchange = function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    f.text().then(function (t) {
+      var j = JSON.parse(t); if (!j || j.aurapad !== 1 || typeof j.state !== 'object') throw 0;
+      if (!confirm('Restaurar o backup? Isso substitui os dados atuais deste aparelho (os sons importados não são afetados).')) return;
+      localStorage.setItem(STORE, JSON.stringify(j.state)); location.reload();
+    }).catch(function () { toast('Arquivo de backup inválido'); }); e.target.value = '';
+  };
+  $('#songNow').onclick = showNotes; $('#notesClose').onclick = function () { $('#notesBox').classList.add('hidden'); };
+  // pede armazenamento persistente (evita que o Safari/Chrome apaguem os dados)
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  // tela sempre ligada enquanto o app está aberto
+  var wl = null;
+  function wake() { try { if (navigator.wakeLock && !document.hidden && !wl) navigator.wakeLock.request('screen').then(function (l) { wl = l; l.addEventListener('release', function () { wl = null; }); }, function () {}); } catch (e) {} }
+  document.addEventListener('visibilitychange', wake); document.addEventListener('pointerdown', wake, true); wake();
+  // travar toques: segurar 1,5 s para destravar
+  var lk = $('#lockLayer'), tm = null, hold = $('#lockHold');
+  $('#btnLock').onclick = function () { lk.classList.remove('hidden'); toast('Tela travada'); };
+  function un() { clearTimeout(tm); tm = null; hold.classList.remove('go'); }
+  hold.addEventListener('pointerdown', function (e) { e.preventDefault(); hold.classList.add('go'); tm = setTimeout(function () { un(); lk.classList.add('hidden'); toast('Tela destravada'); }, 1500); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { hold.addEventListener(ev, un); });
+  lk.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 }
 
 /* ---------- eventos gerais ---------- */
@@ -809,7 +859,7 @@ function boot() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
   loadCatalog().then(function () {
     renderFams(); renderKeys(); renderPadBtn(); bindFx(); renderFx(); bindSets(); bindSetlist(); bindMidi(); renderMidiMap();
-    bindMetro(); renderSongs(); renderSongNow(); bindUI();
+    bindMetro(); renderSongs(); renderSongNow(); bindUI(); bindSafety();
     loadUserSamples().then(renderDrums);
     renderDrums();
     // áudio pronto desde a abertura (fica suspenso até o primeiro toque, regra do navegador)

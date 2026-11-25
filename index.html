@@ -22,6 +22,7 @@
   <div class="song-now" id="songNow">—</div>
   <div class="hdr-right">
     <label class="mini">Master <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.9"></label>
+    <button id="btnLock" title="Travar a tela (segure 1,5 s para destravar)" aria-label="Travar a tela">🔒</button>
     <button id="btnPanic" class="danger" title="Parar tudo">■ Parar</button>
   </div>
 </header>
@@ -204,6 +205,8 @@
   <ol id="songs" class="songs"></ol>
   <div class="row gap wrap">
     <button id="slExport">Exportar setlist</button>
+    <button id="bkExport">Backup completo</button>
+    <label class="filebtn">Restaurar backup <input type="file" id="bkImport" accept="application/json" hidden></label>
     <label class="filebtn">Importar setlist <input type="file" id="slImport" accept="application/json" hidden></label>
   </div>
 </section>
@@ -238,6 +241,13 @@
   </div>
 </div>
 
+<div id="notesBox" class="overlay hidden">
+  <div class="modal-card">
+    <div class="row between"><h3 id="notesTitle">Notas</h3><button id="notesClose">Fechar</button></div>
+    <pre id="notesText" class="notes"></pre>
+  </div>
+</div>
+<div id="lockLayer" class="hidden"><button id="lockHold">Segure para destravar</button></div>
 <div id="toast"></div>
 <script src="app.js"></script>
 <script src="stagelab.js"></script>
