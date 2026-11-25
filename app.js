@@ -8,11 +8,13 @@ var DRUM_KEYS = ['Digit1','Digit2','Digit3','Digit4','KeyQ','KeyW','KeyE','KeyR'
 var KIT3 = ['kick-kit-3','snare-kit-3','hihat-kit-3','hihat-open-kit-3','tom-1-kit-3','tom-2-kit-3','tom-3-kit-3','crash-kit-3','','','','','','','',''];
 var DEFAULT_KIT = KIT3;
 var FACTORY_KITS = [
-  { name: 'Kit 1', ids: ['kick-1-kit-1','clap-1-kit-1','sub-kick-kit-1','tom-1-kit-1','tom-2-kit-1','tom-3-kit-1','tumb-1-kit-1','wood-1-kit-1','','','','','','','',''] },
-  { name: 'Kit 2', ids: ['tom-1-kit-2','tom-2-kit-2','tom-3-kit-2','fx-tom-kit-2','tumb-2-kit-2','boom-kit-2','swell-kit-2','2-white-noise-kit-2','','','','','','','',''] },
-  { name: 'Kit 3', ids: KIT3 },
-  { name: 'Kit 4 (FX)', ids: ['sub-kick-fxkit-4','tumb-fxkit-4','wood-fxkit-4','boom-fxkit-4','blop-fxkit-4','noise-fxkit-4','perc-fxkit-4','swell-fxkit-4','','','','','','','',''] },
+  { name: 'Drum Kit 1', ids: ['kick-1-kit-1','clap-1-kit-1','wood-1-kit-1','tumb-1-kit-1','tom-1-kit-1','tom-2-kit-1','tom-3-kit-1','sub-kick-kit-1','','','','','','','',''], labels: ['Kick 1','Clap 1','Wood 1','Tumb 1','Tom 1','Tom 2','Tom 3','Sub Kick'] },
+  { name: 'EFX 1', ids: ['boom-kit-2','fx-tom-kit-2','swell-kit-2','tumb-2-kit-2','tom-1-kit-2','tom-2-kit-2','tom-3-kit-2','2-white-noise-kit-2','','','','','','','',''], labels: ['Boom','FX Tom','Swell','Tumb 2','Tom 1','Tom 2','Tom 3','White Noise 2'] },
+  { name: 'Worship Drums', ids: ['kick-kit-3','snare-kit-3','hihat-kit-3','hihat-open-kit-3','tom-1-kit-3','tom-2-kit-3','tom-3-kit-3','crash-kit-3','','','','','','','',''], labels: ['Kick','Snare','Hi-Hat','Hi-Hat Open','Tom 1','Tom 2','Tom 3','Crash'] },
+  { name: 'Worship EFX', ids: ['sub-kick-fxkit-4','boom-fxkit-4','perc-fxkit-4','wood-fxkit-4','tumb-fxkit-4','blop-fxkit-4','noise-fxkit-4','swell-fxkit-4','','','','','','','',''], labels: ['Sub Kick FX','Boom FX','Perc FX','Wood FX','Tumb FX','Blop FX','Noise FX','Swell FX'] },
 ];
+var OLD_KIT_NAMES = { 'Kit 1': 'Drum Kit 1', 'Kit 2': 'EFX 1', 'Kit 3': 'Worship Drums', 'Kit 4 (FX)': 'Worship EFX' };
+function fixKitRef(v) { return (typeof v === 'string' && v.slice(0, 2) === 'f:' && OLD_KIT_NAMES[v.slice(2)]) ? 'f:' + OLD_KIT_NAMES[v.slice(2)] : v; }
 var STORE = 'aurapad.v1';
 
 function $(s, r) { return (r || document).querySelector(s); }
@@ -25,7 +27,7 @@ var DEF = {
   family: 'shimmer', key: 'C', padVol: 0.8, padFade: 4, padLoop: 5, drumVol: 0.9, masterVol: 0.9,
   fx: { cut: 1, pan: 0, low: 0, high: 0, rev: 0.25, comp: false, th: -24, ra: 4 },
   bpm: 72, sig: 4, click: 'classic', metVol: 0.7, accent: true,
-  kit: DEFAULT_KIT.slice(), dvol: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], kitSel: 'f:Kit 3', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
+  kit: DEFAULT_KIT.slice(), dvol: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], kitSel: 'f:Worship Drums', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
 };
 var S = (function () {
   var s = {};
@@ -36,6 +38,8 @@ var S = (function () {
     else out[k] = s[k];
   });
   if (!Array.isArray(out.kit) || out.kit.length !== 16) out.kit = DEFAULT_KIT.slice();
+  out.kitSel = fixKitRef(out.kitSel);
+  out.setlist = (out.setlist || []).map(function (x) { if (x && x.kit) x.kit = fixKitRef(x.kit); return x; });
   if (!Array.isArray(out.dvol) || out.dvol.length !== 16) out.dvol = DEF.dvol.slice();
   return out;
 })();
@@ -311,7 +315,7 @@ function renderDrums() {
     var m = drumMeta(id);
     var p = el('div', 'dpad'); p.dataset.action = 'drum:' + i; p.dataset.fast = '1';
     p.appendChild(el('b', null, String(i + 1)));
-    p.appendChild(el('span', null, m ? m.name : '(vazio)'));
+    p.appendChild(el('span', null, kitLabel(i) || (m ? m.name : '(vazio)')));
     g.appendChild(p);
   });
   $('#tab-drums').classList.toggle('editing', drumEditing);
@@ -331,13 +335,18 @@ function renderDrums() {
   sel.value = cur;
   if (!cur) { var o0 = el('option', null, 'Personalizado'); o0.value = ''; sel.insertBefore(o0, sel.firstChild); sel.value = ''; }
 }
+function kitLabel(i) {
+  var v = S.kitSel, r = null;
+  if (v && v[0] === 'f') FACTORY_KITS.forEach(function (k) { if (k.name === v.slice(2) && k.ids[i] === S.kit[i] && k.labels) r = k.labels[i] || null; });
+  return r;
+}
 function renderDvols() {
   var box = $('#dvols'); if (!box) return; box.innerHTML = '';
   S.kit.forEach(function (id, i) {
     if (!id) return;
     var m = drumMeta(id);
     var w = el('div', 'dv');
-    var top = el('div', 'dvt'); top.appendChild(el('b', null, m ? m.name : id));
+    var top = el('div', 'dvt'); top.appendChild(el('b', null, kitLabel(i) || (m ? m.name : id)));
     var o = el('output', null, Math.round(S.dvol[i] * 100) + '%'); top.appendChild(o);
     var r = document.createElement('input'); r.type = 'range'; r.min = 0; r.max = 1; r.step = 0.01; r.value = S.dvol[i];
     r.setAttribute('aria-label', 'Volume ' + (m ? m.name : 'pad ' + (i + 1)));
