@@ -681,9 +681,14 @@ function bindUI() {
   $$('#tabs button').forEach(function (b) {
     b.onclick = function () {
       $$('#tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
-      $$('.tab').forEach(function (t) { t.classList.toggle('on', t.id === 'tab-' + b.dataset.tab); });
+      var live = b.dataset.tab === 'live';
+      document.body.classList.toggle('live', live);
+      $$('.tab').forEach(function (t) {
+        t.classList.toggle('on', live ? (t.id === 'tab-pads' || t.id === 'tab-drums') : t.id === 'tab-' + b.dataset.tab);
+      });
     };
   });
+  (function () { var b = $('#tabs button.on'); if (b) b.onclick(); })();
   // ações: pointerdown para os rápidos (drum pads, tap), click para o resto
   document.addEventListener('pointerdown', function (e) {
     if (ctx && ctx.state !== 'running') ctx.resume();

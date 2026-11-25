@@ -108,3 +108,16 @@ progress{width:140px}
 .kitbar{display:flex;gap:8px;align-items:center;margin:0 0 10px}
 .kitbar select{flex:1;min-width:0;font-size:1.05rem;padding:12px}
 .kitbar button{min-width:52px;padding:12px;font-size:1.1rem}
+
+/* Palco: pads + drums na mesma tela */
+body.live main{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+body.live main>.tab{margin:0}
+body.live #tab-drums>.card,body.live .sliders{display:none}
+body.live #tab-pads .fams{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+@media(min-width:900px){
+  body.live main{grid-template-columns:1.15fr 1fr}
+  body.live .keys{grid-template-columns:repeat(4,1fr)}
+  body.live .key{height:84px}
+  body.live .dpad{min-height:84px}
+}
+body.live main{max-width:1400px}
