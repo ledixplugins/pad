@@ -5,18 +5,13 @@
 var NOTES = ['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
 var LABEL = {C:'C',Cs:'C#',D:'D',Ds:'D#',E:'E',F:'F',Fs:'F#',G:'G',Gs:'G#',A:'A',As:'A#',B:'B'};
 var DRUM_KEYS = ['Digit1','Digit2','Digit3','Digit4','KeyQ','KeyW','KeyE','KeyR','KeyA','KeyS','KeyD','KeyF','KeyZ','KeyX','KeyC','KeyV'];
-var DEFAULT_KIT = ['kick-kit-3','snare-kit-3','clap-1-kit-1','hihat-kit-3',
-                   'hihat-open-kit-3','tom-1-kit-3','tom-2-kit-3','tom-3-kit-3',
-                   'sub-kick-kit-1','crash-kit-3','shaker-2','tamb-2',
-                   'snap-1','wood-1','boom-kit-2','swell-kit-2'];
+var KIT3 = ['kick-kit-3','snare-kit-3','hihat-kit-3','hihat-open-kit-3','tom-1-kit-3','tom-2-kit-3','tom-3-kit-3','crash-kit-3','','','','','','','',''];
+var DEFAULT_KIT = KIT3;
 var FACTORY_KITS = [
-  { name: 'Worship (padrão)', ids: DEFAULT_KIT },
-  { name: 'Kit suave', ids: ['kick-1-kit-1','snare-1','clap-1-kit-1','hihat-kit-3','hihat-open-kit-3','tom-1-kit-1','tom-2-kit-1','tom-3-kit-1','sub-kick-kit-1','crash-kit-3','shaker-3','tamb-3','snap-2','wood-1-kit-1','boom-kit-2','swell-kit-2'] },
-  { name: 'Kit toms graves', ids: ['kick-kit-3','snare-3','clap-2','hihat-kit-3','hihat-open-kit-3','tom-1-kit-2','tom-2-kit-2','tom-3-kit-2','sub-1','crash-kit-3','shaker-4','tamb-4','snap-3-fx','wood-2','boom-1-fx','swell-drums-fx'] },
-  { name: 'Kit FX moderno', ids: ['sub-kick-fxkit-4','snare-fx-2','clap-4-fx','hihat-kit-3','hihat-open-kit-3','tumb-fxkit-4','perc-fxkit-4','blop-fxkit-4','sub-2','crash-kit-3','noise-fxkit-4','shaker-fx-13','snap-4-fx','wood-fxkit-4','boom-fxkit-4','swell-fxkit-4'] },
-  { name: 'Eletrônico 808/909', ids: ['kick-808-6','snare-5','clap-3','hihat-kit-3','hihat-open-kit-3','kick-909-9','kick-2-808-7','kick-2-909-10','sub-1','crash-kit-3','shaker-5','tamb-5','snap-1','wood-3','kick-fx-14','reverse-cymbal-6'] },
-  { name: 'Percussão', ids: ['kick-2','wood-block-9','clap-6','shaker-2','shaker-long-16','tumb-1-kit-1','tumb-2-kit-2','tumb-fxkit-4','sub-1','chimes-bell-5','shaker-egg-1','tamb-2','snap-1','wood-1','tamb-long-1','tamb-shake-9'] },
-  { name: 'Efeitos e atmosfera', ids: ['boom-cinematic','boom-2-fx','impact-fx-worship','whoosh-impact','whoosh-boom-rise','rise-reverse-symbal','reverse-worship','reverse-cymbal-7','swell-drums-fx','swell-kit-2','explosion-fx-worship','pressure-boom-worship','long-boom','chimes-bell-5','efx-chimes-4','2-white-noise-kit-2'] },
+  { name: 'Kit 1', ids: ['kick-1-kit-1','clap-1-kit-1','sub-kick-kit-1','tom-1-kit-1','tom-2-kit-1','tom-3-kit-1','tumb-1-kit-1','wood-1-kit-1','','','','','','','',''] },
+  { name: 'Kit 2', ids: ['tom-1-kit-2','tom-2-kit-2','tom-3-kit-2','fx-tom-kit-2','tumb-2-kit-2','boom-kit-2','swell-kit-2','2-white-noise-kit-2','','','','','','','',''] },
+  { name: 'Kit 3', ids: KIT3 },
+  { name: 'Kit 4 (FX)', ids: ['sub-kick-fxkit-4','tumb-fxkit-4','wood-fxkit-4','boom-fxkit-4','blop-fxkit-4','noise-fxkit-4','perc-fxkit-4','swell-fxkit-4','','','','','','','',''] },
 ];
 var STORE = 'aurapad.v1';
 
@@ -30,7 +25,7 @@ var DEF = {
   family: 'shimmer', key: 'C', padVol: 0.8, padFade: 4, padLoop: 5, drumVol: 0.9, masterVol: 0.9,
   fx: { cut: 1, pan: 0, low: 0, high: 0, rev: 0.25, comp: false, th: -24, ra: 4 },
   bpm: 72, sig: 4, click: 'classic', metVol: 0.7, accent: true,
-  kit: DEFAULT_KIT.slice(), kitSel: 'f:Worship (padrão)', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
+  kit: DEFAULT_KIT.slice(), kitSel: 'f:Kit 3', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
 };
 var S = (function () {
   var s = {};
@@ -318,7 +313,7 @@ function kitIds(v) {
   var n = v.slice(2), arr = null;
   if (v[0] === 'f') FACTORY_KITS.forEach(function (k) { if (k.name === n) arr = k.ids; });
   else arr = S.drumSets[n];
-  return arr ? arr.map(function (id, i) { return drumMeta(id) ? id : DEFAULT_KIT[i]; }) : null;
+  return arr ? arr.map(function (id, i) { return !id || drumMeta(id) ? id : DEFAULT_KIT[i]; }) : null;
 }
 function applyKit(v, quiet) {
   var ids = kitIds(v); if (!ids || ids.length !== 16) return;
