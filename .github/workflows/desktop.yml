@@ -1,0 +1,81 @@
+name: Instaladores (Windows e macOS)
+# Gera o app AURA Pad (com todos os sons) para Windows (.exe) e macOS (.pkg) e publica na Release.
+on:
+  push:
+    branches: [main]
+    paths: ['desktop/**', 'index.html', 'style.css', 'app.js', 'knob.js', 'stagelab.js', 'pager.js', 'licenca.js', 'catalog.json', 'audio/**', 'sf/**', '.github/workflows/desktop.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+env:
+  VERSAO: "1.0.0"
+jobs:
+  instalador-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Gerar instalador .exe
+        shell: bash
+        working-directory: desktop
+        run: |
+          npm install --no-audit --no-fund
+          npm run dist:win
+          ls dist
+          cp dist/*.exe ../AURA-Pad-Windows.exe
+      - uses: actions/upload-artifact@v4
+        with: { name: AURA-Pad-Windows-Setup, path: "AURA-Pad-Windows.exe" }
+  instalador-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Gerar o app (universal Intel + Apple Silicon)
+        working-directory: desktop
+        run: |
+          npm install --no-audit --no-fund 2>&1 | tail -5
+          npm run dist:mac
+          ls dist
+      - name: Montar o instalador .pkg
+        run: |
+          set -e
+          APP=$(ls -d desktop/dist/mac-universal/*.app | head -1)
+          codesign --force --deep -s - "$APP" || true
+          mkdir -p pkgroot/Applications pkgs
+          cp -R "$APP" pkgroot/Applications/
+          pkgbuild --root pkgroot --identifier br.com.ledixplugins.aurapad.app --version $VERSAO pkgs/app.pkg
+          cp desktop/build/EULA.txt pkgs/license.txt
+          cat > pkgs/dist.xml <<'X'
+          <?xml version="1.0" encoding="utf-8"?>
+          <installer-gui-script minSpecVersion="1">
+            <title>AURA Pad</title>
+            <license file="license.txt"/>
+            <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>
+            <choices-outline><line choice="app"/></choices-outline>
+            <choice id="app" title="Aplicativo AURA Pad" description="Instala o programa na pasta Aplicativos."><pkg-ref id="br.com.ledixplugins.aurapad.app"/></choice>
+            <pkg-ref id="br.com.ledixplugins.aurapad.app">app.pkg</pkg-ref>
+          </installer-gui-script>
+          X
+          sed -i '' 's/^          //' pkgs/dist.xml
+          productbuild --distribution pkgs/dist.xml --package-path pkgs --resources pkgs "AURA-Pad-macOS.pkg"
+          ls -la *.pkg
+      - uses: actions/upload-artifact@v4
+        with: { name: AURA-Pad-macOS-Setup, path: "AURA-Pad-macOS.pkg" }
+  publicar:
+    # publica os instaladores na Release; o site aponta para /releases/latest/download/
+    needs: [instalador-win, instalador-mac]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: AURA-Pad-Windows-Setup, path: rel }
+      - uses: actions/download-artifact@v4
+        with: { name: AURA-Pad-macOS-Setup, path: rel }
+      - name: Criar ou atualizar a Release
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          TAG="v${VERSAO}"
+          gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1 \
+            && gh release upload "$TAG" rel/* --clobber --repo "${{ github.repository }}" \
+            || gh release create "$TAG" rel/* --repo "${{ github.repository }}" --target "${{ github.sha }}" --latest --title "AURA Pad $TAG" --notes "Instaladores do AURA Pad para Windows e macOS. Teste grátis de 15 dias. © 2026 Thiago R. Galvão."

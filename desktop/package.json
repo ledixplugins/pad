@@ -1,0 +1,53 @@
+{
+  "name": "aura-pad",
+  "productName": "AURA Pad",
+  "version": "1.0.0",
+  "description": "AURA Pad — pads infinitos, drum pads e teclado de palco para louvor ao vivo",
+  "author": "Thiago R. Galvão",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "prepare-app": "node scripts/prepare-app.js",
+    "start": "npm run prepare-app && electron .",
+    "dist:win": "npm run prepare-app && electron-builder --win nsis --x64",
+    "dist:mac": "npm run prepare-app && electron-builder --mac dir --universal"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "br.com.ledixplugins.aurapad",
+    "productName": "AURA Pad",
+    "copyright": "© 2026 Thiago R. Galvão. Todos os direitos reservados.",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["src/**", "build/icon.png", "package.json"],
+    "extraResources": [{ "from": "app", "to": "web", "filter": ["**/*"] }],
+    "asar": true,
+    "artifactName": "AURA-Pad-Setup-${version}.${ext}",
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.ico",
+      "publisherName": "Thiago R. Galvão",
+      "legalTrademarks": "AURA Pad"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "license": "build/EULA.txt",
+      "shortcutName": "AURA Pad",
+      "language": "1046"
+    },
+    "mac": {
+      "identity": null,
+      "category": "public.app-category.music",
+      "icon": "build/icon.icns",
+      "target": [{ "target": "dir", "arch": ["universal"] }],
+      "extendInfo": { "NSHumanReadableCopyright": "© 2026 Thiago R. Galvão. Todos os direitos reservados." }
+    }
+  }
+}

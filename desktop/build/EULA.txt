@@ -1,0 +1,30 @@
+CONTRATO DE LICENÇA DE USUÁRIO FINAL (EULA) — AURA PAD
+Versão 1.0 · © 2026 Thiago R. Galvão. Todos os direitos reservados.
+
+[MINUTA — revisar com advogado antes de publicar.]
+
+1. TITULAR. O AURA Pad (o "Software"), incluindo código, design, logotipo, textos, sons de fábrica (pads, samples de bateria e timbres) e documentação, é obra de Thiago R. Galvão ("Autor"), protegida pela Lei 9.609/98 (Lei do Software) e pela Lei 9.610/98 (Direitos Autorais). O Software é licenciado, não vendido.
+
+2. LICENÇA. Mediante chave de ativação válida, o Autor concede ao comprador uma licença pessoal, não exclusiva e intransferível para instalar e usar o Software em até 3 (três) aparelhos de sua propriedade e uso pessoal, para produzir e apresentar música, inclusive comercialmente. As músicas e gravações criadas com o Software pertencem ao usuário.
+
+3. TESTE GRATUITO. O Software pode ser usado gratuitamente, com todos os recursos, por 15 (quinze) dias a partir do primeiro uso. Após esse prazo é necessária uma chave de ativação.
+
+4. ATIVAÇÃO. A chave é única e pessoal. Para ativá-la, o Software envia ao servidor de licenças a chave, o nome do aparelho e um identificador anônimo (resumo criptográfico) do aparelho. O usuário pode desativar um aparelho a qualquer momento para liberar a vaga em outro. É proibido compartilhar, vender ou publicar a chave. O uso da mesma chave acima do limite pode levar ao bloqueio da licença.
+
+5. RESTRIÇÕES. É proibido: copiar ou redistribuir o Software; fazer engenharia reversa, descompilar ou modificar o código, exceto quando a lei expressamente permitir; remover avisos de autoria ou o mecanismo de licença; sublicenciar, alugar ou revender o Software ou seus sons de fábrica como biblioteca própria.
+
+6. MARCAS DE TERCEIROS. Nomes de fabricantes e produtos eventualmente citados pertencem a seus respectivos donos e são usados apenas para identificar compatibilidade. O AURA não é afiliado a eles nem por eles endossado.
+
+7. DIREITO DE ARREPENDIMENTO. Em compras feitas pela internet, o consumidor pode desistir em até 7 (sete) dias do recebimento, com reembolso integral (art. 49 do Código de Defesa do Consumidor). A licença reembolsada é desativada.
+
+8. GARANTIA E RESPONSABILIDADE. O Software é fornecido no estado em que se encontra. O Autor não responde por perdas indiretas, perda de dados ou danos decorrentes do uso em apresentações ou gravações, na extensão permitida em lei. Nada neste contrato limita direitos do consumidor garantidos por lei.
+
+9. DADOS PESSOAIS (LGPD). Para vender e licenciar o Software são tratados: e-mail e dados de pagamento (pelo processador de pagamentos), chave de licença, nome e identificador do aparelho. Finalidade: cumprir o contrato, ativar a licença e dar suporte. O áudio, as setlists e os ajustes do usuário não são enviados ao Autor. Contato do titular dos dados: [e-mail de suporte].
+
+10. ATUALIZAÇÕES. O Autor pode lançar atualizações; atualizações da mesma versão principal estão incluídas na licença.
+
+11. RESCISÃO. A licença termina se o usuário descumprir este contrato; nesse caso deve apagar o Software.
+
+12. FORO. Lei brasileira. Foro do domicílio do consumidor.
+
+Contato: [e-mail de suporte] · https://ledixplugins.com.br/aurapad/

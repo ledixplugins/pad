@@ -1139,7 +1139,7 @@ function downloadAll() {
 
 /* ---------- início ---------- */
 function boot() {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+  if ('serviceWorker' in navigator && !window.auraDesktop) navigator.serviceWorker.register('sw.js').catch(function () {});
   loadCatalog().then(function () {
     renderFams(); renderKeys(); renderPadBtn(); bindFx(); renderFx(); bindSets(); bindSetlist(); bindMidi(); renderMidiMap();
     bindMetro(); bindLive(); bindLists(); renderSongs(); renderSongNow(); bindUI(); bindSafety();
@@ -1150,6 +1150,7 @@ function boot() {
     loadClicks(); preloadKit(); prefetchFamily(S.family); initMidi(); refit();
   }).catch(function (e) { toast('Erro ao carregar o catálogo'); console.error(e); });
 }
-window.AuraPad = { get ctx() { return ctx; }, get A() { return A; }, S: S, save: save, toast: toast };
+window.AuraPad = { get ctx() { return ctx; }, get A() { return A; }, S: S, save: save, toast: toast,
+  panic: function () { try { padStop(0.3); metStop(); if (window.StageLab) StageLab.allOff(); } catch (e) {} } };
 boot();
 })();
