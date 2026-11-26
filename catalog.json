@@ -135,7 +135,7 @@
   },
   {
    "id": "atmospheric-efx",
-   "name": "Atmospheric EFX",
+   "name": "Horizon EFX",
    "category": "Dark",
    "files": {
     "C": "audio/pads/atmospheric-efx/C.m4a",
@@ -173,7 +173,7 @@
   },
   {
    "id": "epic-efx",
-   "name": "Epic EFX",
+   "name": "Glory EFX",
    "category": "Dark",
    "files": {
     "C": "audio/pads/epic-efx/C.m4a",
@@ -211,7 +211,7 @@
   },
   {
    "id": "haze-efx",
-   "name": "Haze EFX",
+   "name": "Veil EFX",
    "category": "Dark",
    "files": {
     "C": "audio/pads/haze-efx/C.m4a",
@@ -249,7 +249,7 @@
   },
   {
    "id": "pad-wind-efx",
-   "name": "Pad Wind EFX",
+   "name": "Gale EFX",
    "category": "Dark",
    "files": {
     "C": "audio/pads/pad-wind-efx/C.m4a",
@@ -268,7 +268,7 @@
   },
   {
    "id": "shimmer-worship-efx",
-   "name": "Shimmer Worship EFX",
+   "name": "Worship Shimmer EFX",
    "category": "Shimmer",
    "files": {
     "C": "audio/pads/shimmer-worship-efx/C.m4a",
