@@ -8,13 +8,13 @@ var DRUM_KEYS = ['Digit1','Digit2','Digit3','Digit4','KeyQ','KeyW','KeyE','KeyR'
 var KIT3 = ['kick-kit-3','snare-kit-3','hihat-kit-3','hihat-open-kit-3','tom-1-kit-3','tom-2-kit-3','tom-3-kit-3','crash-kit-3','','','','','','','',''];
 var DEFAULT_KIT = KIT3;
 var FACTORY_KITS = [
-  { name: 'Standard Drum Kit', ids: ['kick-1-kit-1','clap-1-kit-1','wood-1-kit-1','tumb-1-kit-1','tom-1-kit-1','tom-2-kit-1','tom-3-kit-1','sub-kick-kit-1','','','','','','','',''], labels: ['Kick 1','Clap 1','Wood 1','Tumb 1','Tom 1','Tom 2','Tom 3','Sub Kick'] },
-  { name: 'Effects Drum Kit', ids: ['boom-kit-2','fx-tom-kit-2','swell-kit-2','tumb-2-kit-2','tom-1-kit-2','tom-2-kit-2','tom-3-kit-2','2-white-noise-kit-2','','','','','','','',''], labels: ['Boom','FX Tom','Swell','Tumb 2','Tom 1','Tom 2','Tom 3','White Noise 2'] },
-  { name: 'Worship Standard Drum Kit', ids: ['kick-kit-3','snare-kit-3','hihat-kit-3','hihat-open-kit-3','tom-1-kit-3','tom-2-kit-3','tom-3-kit-3','crash-kit-3','','','','','','','',''], labels: ['Kick','Snare','Hi-Hat','Hi-Hat Open','Tom 1','Tom 2','Tom 3','Crash'] },
-  { name: 'Worship Effects Drum Kit', ids: ['sub-kick-fxkit-4','boom-fxkit-4','perc-fxkit-4','wood-fxkit-4','tumb-fxkit-4','blop-fxkit-4','noise-fxkit-4','swell-fxkit-4','','','','','','','',''], labels: ['Sub Kick FX','Boom FX','Perc FX','Wood FX','Tumb FX','Blop FX','Noise FX','Swell FX'] },
+  { name: 'Standard Kit', ids: ['kick-1-kit-1','clap-1-kit-1','wood-1-kit-1','tumb-1-kit-1','tom-1-kit-1','tom-2-kit-1','tom-3-kit-1','sub-kick-kit-1','','','','','','','',''], labels: ['Kick 1','Clap 1','Wood 1','Tumb 1','Tom 1','Tom 2','Tom 3','Sub Kick'] },
+  { name: 'Effects Kit', ids: ['boom-kit-2','fx-tom-kit-2','swell-kit-2','tumb-2-kit-2','tom-1-kit-2','tom-2-kit-2','tom-3-kit-2','2-white-noise-kit-2','','','','','','','',''], labels: ['Boom','FX Tom','Swell','Tumb 2','Tom 1','Tom 2','Tom 3','White Noise 2'] },
+  { name: 'Worship Kit', ids: ['kick-kit-3','snare-kit-3','hihat-kit-3','hihat-open-kit-3','tom-1-kit-3','tom-2-kit-3','tom-3-kit-3','crash-kit-3','','','','','','','',''], labels: ['Kick','Snare','Hi-Hat','Hi-Hat Open','Tom 1','Tom 2','Tom 3','Crash'] },
+  { name: 'Worship FX Kit', ids: ['sub-kick-fxkit-4','boom-fxkit-4','perc-fxkit-4','wood-fxkit-4','tumb-fxkit-4','blop-fxkit-4','noise-fxkit-4','swell-fxkit-4','','','','','','','',''], labels: ['Sub Kick FX','Boom FX','Perc FX','Wood FX','Tumb FX','Blop FX','Noise FX','Swell FX'] },
 ];
-var OLD_KIT_NAMES = { 'Kit 1': 'Standard Drum Kit', 'Kit 2': 'Effects Drum Kit', 'Kit 3': 'Worship Standard Drum Kit', 'Kit 4 (FX)': 'Worship Effects Drum Kit',
-  'Drum Kit 1': 'Standard Drum Kit', 'EFX 1': 'Effects Drum Kit', 'Worship Drums': 'Worship Standard Drum Kit', 'Worship EFX': 'Worship Effects Drum Kit' };
+var OLD_KIT_NAMES = { 'Standard Drum Kit': 'Standard Kit', 'Effects Drum Kit': 'Effects Kit', 'Worship Standard Drum Kit': 'Worship Kit', 'Worship Effects Drum Kit': 'Worship FX Kit', 'Kit 1': 'Standard Kit', 'Kit 2': 'Effects Kit', 'Kit 3': 'Worship Kit', 'Kit 4 (FX)': 'Worship FX Kit',
+  'Drum Kit 1': 'Standard Kit', 'EFX 1': 'Effects Kit', 'Worship Drums': 'Worship Kit', 'Worship EFX': 'Worship FX Kit' };
 function fixKitRef(v) { return (typeof v === 'string' && v.slice(0, 2) === 'f:' && OLD_KIT_NAMES[v.slice(2)]) ? 'f:' + OLD_KIT_NAMES[v.slice(2)] : v; }
 var STORE = 'aurapad.v1';
 
@@ -29,7 +29,7 @@ var DEF = {
   fx: { cut: 1, pan: 0, low: 0, high: 0, rev: 0.25, comp: false, th: -24, ra: 4 },
   family2: '', mix2: 0.5, pulse: 0, pulseDepth: 0.5, swell: 0, loop: '', loopVol: 0.8, lists: {}, listName: 'Setlist 1',
   bpm: 72, sig: 4, click: 'classic', metVol: 0.7, accent: true,
-  kit: DEFAULT_KIT.slice(), dvol: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], kitSel: 'f:Worship Standard Drum Kit', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
+  kit: DEFAULT_KIT.slice(), dvol: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], kitSel: 'f:Worship Kit', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
 };
 var S = (function () {
   var s = {};
