@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.0.2",
+    "date": "2026-11-26",
+    "titulo": "Novo ícone",
+    "itens": [
+      "Novo ícone do AURA Pad, em ciano e com pads em camadas, para não se confundir com o do AURA Synth.",
+      "No Mac e no Windows, o ícone do programa muda ao instalar o instalador novo; a atualização automática troca só o ícone dentro do app."
+    ]
+  },
+  {
     "version": "1.0.1",
     "date": "2026-11-26",
     "titulo": "Identificação de autoria",
