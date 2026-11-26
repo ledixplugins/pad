@@ -786,3 +786,8 @@ body.stage .fam small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
 @media (max-height:700px){body.stage #tab-pads .live-extra{display:none}}
 @media (max-height:700px){body.stage .fam small{display:none}}
+@media (max-width:480px){
+  .live-extra button[data-action="loop:toggle"]{width:40px;min-width:40px}
+  .live-extra select{min-width:60px}
+  .live-extra input[type=range]{width:36px}
+}

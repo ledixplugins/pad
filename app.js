@@ -499,21 +499,44 @@ function bindFx() {
 /* padrões de bateria: 16 passos (semicolcheias) por compasso 4/4; dígito = força (0 a 9)
    slots do kit: 0 kick, 1 caixa, 2 hi-hat, 3 hi-hat aberto, 7 crash */
 var LOOPS = [
-  { id: 'balada', name: 'Balada suave', p: { 0: '9000000000900000', 1: '0000900000009000', 2: '6050605060506050' } },
-  { id: 'worship', name: 'Worship médio', p: { 0: '9000000090000000', 1: '0000900000009000', 2: '7060706070607060', 3: '0000000000000010' } },
-  { id: 'pop', name: 'Pop 4 tempos', p: { 0: '9000900090009000', 1: '0000900000009000', 2: '6060606060606060' } },
-  { id: 'rock', name: 'Rock', p: { 0: '9000009090000000', 1: '0000900000009000', 2: '8070807080708070' } },
-  { id: 'cresc', name: 'Hi-hat 16 + kick', p: { 0: '9000000000100000', 1: '0000900000009000', 2: '5343534353435343' } },
-  { id: 'pulso', name: 'Só pulso (kick)', p: { 0: '8000800080008000' } }
+  { id: 'balada', name: 'Balada suave',
+    p: { 0: '9000000000900000', 1: '0000900000009000', 2: '6050605060506050' },
+    p3: { 0: '900000000000', 1: '000050005000', 2: '505050505050' },
+    p6: { 0: '900000000000', 1: '000000500000', 2: '505050505050' } },
+  { id: 'worship', name: 'Worship médio',
+    p: { 0: '9000000090000000', 1: '0000900000009000', 2: '7060706070607060', 3: '0000000000000010' },
+    p3: { 0: '900000000000', 1: '000080008000', 2: '707070707070' },
+    p6: { 0: '900000009000', 1: '000000900000', 2: '707070707070' } },
+  { id: 'pop', name: 'Pop 4 tempos',
+    p: { 0: '9000900090009000', 1: '0000900000009000', 2: '6060606060606060' },
+    p3: { 0: '900000000000', 1: '000090009000', 2: '606060606060' },
+    p6: { 0: '900000009000', 1: '000000900000', 2: '606060606060' } },
+  { id: 'rock', name: 'Rock',
+    p: { 0: '9000009090000000', 1: '0000900000009000', 2: '8070807080708070' },
+    p3: { 0: '900000900000', 1: '000090009000', 2: '807080708070' },
+    p6: { 0: '900000009000', 1: '000000900000', 2: '807080708070' } },
+  { id: 'cresc', name: 'Hi-hat 16 + kick',
+    p: { 0: '9000000000100000', 1: '0000900000009000', 2: '5343534353435343' },
+    p3: { 0: '900000000000', 1: '000090009000', 2: '534353435343' },
+    p6: { 0: '900000000000', 1: '000000900000', 2: '534353435343' } },
+  { id: 'pulso', name: 'Só pulso (kick)',
+    p: { 0: '8000800080008000' }, p3: { 0: '800080008000' }, p6: { 0: '900000900000' } }
 ];
+function loopPat(L) {
+  if (S.sig === 3) return L.p3;
+  if (S.sig === 6) return L.p6;
+  if (S.sig === 2) { var o = {}; Object.keys(L.p).forEach(function (k) { o[k] = L.p[k].slice(0, 8); }); return o; }
+  return L.p;
+}
 var LOOPBY = {}; LOOPS.forEach(function (l) { LOOPBY[l.id] = l; });
-var lastLoop = 'worship';
+var lastLoop = 'worship', metByLoop = false;
 function loopSteps(beatT, beat, spb) {
   var L = LOOPBY[S.loop]; if (!L) return;
-  for (var k = 0; k < 4; k++) {
-    var idx = (beat * 4 + k) % 16, t = beatT + k * spb / 4;
-    Object.keys(L.p).forEach(function (slot) {
-      var c = L.p[slot].charAt(idx), v = parseInt(c, 10); if (!v) return;
+  var P = loopPat(L), per = S.sig === 6 ? 2 : 4;
+  for (var k = 0; k < per; k++) {
+    var t = beatT + k * spb / per;
+    Object.keys(P).forEach(function (slot) {
+      var c = P[slot].charAt((beat * per + k) % P[slot].length), v = parseInt(c, 10); if (!v) return;
       var buf = drumBufs[S.kit[slot]]; if (!buf) { getDrumBuffer(S.kit[slot]); return; }
       var src = ctx.createBufferSource(); src.buffer = buf;
       var g = ctx.createGain(), hum = 1 + (Math.random() - 0.5) * (slot === '2' ? 0.16 : 0.06);
@@ -729,7 +752,10 @@ function doAction(a, vel) {
   else if (p[0] === 'padkey') padKeyTap(p[1]);
   else if (a === 'pad:toggle') padToggle();
   else if (a === 'pad:duck') duckToggle();
-  else if (a === 'loop:toggle') loopSet(S.loop ? '' : lastLoop);
+  else if (a === 'loop:toggle') {
+    if (S.loop) { loopSet(''); if (metByLoop) { metStop(); metByLoop = false; } }
+    else { loopSet(lastLoop); if (!metOn) { metStart(); metByLoop = true; } }
+  }
   else if (a === 'loop:next') { var i = LOOPS.findIndex(function (l) { return l.id === S.loop; }); loopSet(LOOPS[(i + 1) % LOOPS.length].id); }
   else if (p[0] === 'key') keyShift(parseInt(p[1], 10));
   else if (a === 'met:toggle') { if (metOn) metStop(); else metStart(); }
