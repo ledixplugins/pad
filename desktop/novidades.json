@@ -1,5 +1,16 @@
 [
   {
+    "version": "1.0.4",
+    "date": "2026-11-26",
+    "titulo": "Pads do controlador MIDI no canal certo",
+    "itens": [
+      "Os pads do seu controlador (canal 10) não tocam mais notas musicais do pad por engano: no canal 10 as notas só acionam a bateria.",
+      "Ao mapear, o app agora guarda o canal da nota. O pad e a tecla com a mesma nota deixam de se confundir.",
+      "Ao mapear um pad da bateria, só a nota é gravada (alguns pads mandam também um controle junto, que era gravado por engano).",
+      "A lista de mapeamentos mostra o canal de cada nota."
+    ]
+  },
+  {
     "version": "1.0.3",
     "date": "2026-11-26",
     "titulo": "Volumes pelo controlador MIDI",

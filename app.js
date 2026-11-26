@@ -906,13 +906,28 @@ function effMap() {
   Object.keys(u).forEach(function (k) { if (u[k] === null) delete m[k]; else m[k] = u[k]; });
   return m;
 }
+// Procura a ação de uma mensagem. Mapeamentos novos guardam o canal ('note:60@10'): o pad do controlador (canal 10) e as teclas (canal 1)
+// podem usar a mesma nota sem se confundir. Mapeamentos sem canal (padrão e antigos) valem em qualquer canal, exceto que
+// no canal 10 (bateria, por convenção) as notas nunca trocam o tom do pad.
+function lookupAction(key, ch) {
+  var m = effMap();
+  if (key.indexOf('note:') !== 0) return m[key];
+  var a = m[key + '@' + ch]; if (a) return a;
+  a = m[key];
+  if (a && a.indexOf('padkey:') === 0 && ch === 10) return null;
+  return a;
+}
+function midiLabel(k) {
+  var m = k.split(':'), r = m[1].split('@');
+  return (m[0] === 'note' ? 'Nota ' : 'CC ') + r[0] + (r[1] ? ' · canal ' + r[1] : '');
+}
 function renderMidiMap() {
   var box = $('#midiMap'); box.innerHTML = '';
   var m = effMap();
   Object.keys(m).sort(function (a, b) { return actionName(m[a]) < actionName(m[b]) ? -1 : 1; }).forEach(function (k) {
     var row = el('div', 'mm'); var msg = k.split(':');
     row.appendChild(el('span', null, actionName(m[k])));
-    var right = el('span', null, (msg[0] === 'note' ? 'Nota ' : 'CC ') + msg[1] + ' ');
+    var right = el('span', null, midiLabel(k) + ' ');
     var x = el('button', 'danger', '✕'); x.onclick = function () { S.midiMap[k] = null; save(); renderMidiMap(); };
     right.appendChild(x); row.appendChild(right); box.appendChild(row);
   });
@@ -922,7 +937,7 @@ function onMidi(e) {
   var d = e.data, st = d[0] & 0xf0, n = d[1], v = d[2];
   var ml = $('#midiLast'); if (ml && d[0] < 0xf0) ml.textContent = 'Última mensagem: ' + ({ 0x90: 'Nota ligada', 0x80: 'Nota desligada', 0xb0: 'CC', 0xc0: 'Program Change', 0xe0: 'Pitch bend', 0xd0: 'Aftertouch', 0xa0: 'Aftertouch de tecla' }[st] || 'MIDI') + ' ' + n + (d.length > 2 ? ' · valor ' + v : '') + ' · canal ' + ((d[0] & 15) + 1);
   if (st === 0xc0 && !armed) { if (S.setlist[n]) loadSong(n); return; }   // Program Change N = música N+1
-  var key = null, on = false;
+  var key = null, on = false, ch = (d[0] & 15) + 1;
   if (st === 0x90 && v > 0) { key = 'note:' + n; on = true; }
   else if (st === 0xb0) { key = 'cc:' + n; on = v > 0; }
   else return;
@@ -930,12 +945,14 @@ function onMidi(e) {
   if (!armed && st === 0xb0) { var av = effMap()[key]; if (av && av.indexOf('vol:') === 0) { setVol(av, v / 127); return; } }   // vale também com o fader em 0
   if (!on) return;
   if (armed) { // modo mapear
+    if (armed.indexOf('drum:') === 0 && st !== 0x90) return;      // pad da bateria só aprende NOTA (alguns pads mandam também um CC, que não deve ser gravado)
+    if (key.indexOf('note:') === 0) key += '@' + ch;              // notas guardam o canal; CC vale em qualquer canal
     Object.keys(S.midiMap).forEach(function (k) { if (S.midiMap[k] === armed) delete S.midiMap[k]; });
     S.midiMap[key] = armed; save(); renderMidiMap();
-    toast(actionName(armed) + ' ← ' + key.replace(':', ' ')); armed = null; $('#midiHint').textContent = 'Mapeado. Toque em outro botão ou desative o modo.';
+    toast(actionName(armed) + ' ← ' + midiLabel(key)); armed = null; $('#midiHint').textContent = 'Mapeado. Toque em outro botão ou desative o modo.';
     return;
   }
-  var a = effMap()[key]; if (a) doAction(a, v / 127);
+  var a = lookupAction(key, ch); if (a) doAction(a, v / 127);
 }
 function connectInputs() {
   if (!midiAccess) return;
