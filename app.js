@@ -26,7 +26,7 @@ function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
 var DEF = {
   family: 'shimmer', key: 'C', padVol: 0.8, padFade: 4, padLoop: 5, drumVol: 0.9, masterVol: 0.9,
   fx: { cut: 1, pan: 0, low: 0, high: 0, rev: 0.25, comp: false, th: -24, ra: 4 },
-  family2: '', mix2: 0.5, pulse: 0, pulseDepth: 0.5, swell: 0, lists: {}, listName: 'Setlist 1',
+  family2: '', mix2: 0.5, pulse: 0, pulseDepth: 0.5, swell: 0, loop: '', loopVol: 0.8, lists: {}, listName: 'Setlist 1',
   bpm: 72, sig: 4, click: 'classic', metVol: 0.7, accent: true,
   kit: DEFAULT_KIT.slice(), dvol: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], kitSel: 'f:Worship Drums', drumSets: {}, setlist: [], songIdx: -1, midiMap: {}
 };
@@ -496,6 +496,42 @@ function bindFx() {
 }
 
 /* ---------- metrônomo ---------- */
+/* padrões de bateria: 16 passos (semicolcheias) por compasso 4/4; dígito = força (0 a 9)
+   slots do kit: 0 kick, 1 caixa, 2 hi-hat, 3 hi-hat aberto, 7 crash */
+var LOOPS = [
+  { id: 'balada', name: 'Balada suave', p: { 0: '9000000000900000', 1: '0000900000009000', 2: '6050605060506050' } },
+  { id: 'worship', name: 'Worship médio', p: { 0: '9000000090000000', 1: '0000900000009000', 2: '7060706070607060', 3: '0000000000000010' } },
+  { id: 'pop', name: 'Pop 4 tempos', p: { 0: '9000900090009000', 1: '0000900000009000', 2: '6060606060606060' } },
+  { id: 'rock', name: 'Rock', p: { 0: '9000009090000000', 1: '0000900000009000', 2: '8070807080708070' } },
+  { id: 'cresc', name: 'Hi-hat 16 + kick', p: { 0: '9000000000100000', 1: '0000900000009000', 2: '5343534353435343' } },
+  { id: 'pulso', name: 'Só pulso (kick)', p: { 0: '8000800080008000' } }
+];
+var LOOPBY = {}; LOOPS.forEach(function (l) { LOOPBY[l.id] = l; });
+var lastLoop = 'worship';
+function loopSteps(beatT, beat, spb) {
+  var L = LOOPBY[S.loop]; if (!L) return;
+  for (var k = 0; k < 4; k++) {
+    var idx = (beat * 4 + k) % 16, t = beatT + k * spb / 4;
+    Object.keys(L.p).forEach(function (slot) {
+      var c = L.p[slot].charAt(idx), v = parseInt(c, 10); if (!v) return;
+      var buf = drumBufs[S.kit[slot]]; if (!buf) { getDrumBuffer(S.kit[slot]); return; }
+      var src = ctx.createBufferSource(); src.buffer = buf;
+      var g = ctx.createGain(), hum = 1 + (Math.random() - 0.5) * (slot === '2' ? 0.16 : 0.06);
+      g.gain.value = clamp(v / 9 * hum, 0.05, 1) * (S.dvol[slot] == null ? 1 : S.dvol[slot]) * S.loopVol;
+      src.connect(g); g.connect(A.drumBus); src.start(t);
+    });
+  }
+}
+function loopSet(id) {
+  S.loop = LOOPBY[id] ? id : ''; if (S.loop) lastLoop = S.loop; save(); renderLoop();
+  if (S.loop) S.kit.slice(0, 8).forEach(function (k) { getDrumBuffer(k); });
+}
+function renderLoop() {
+  var s = $('#loopSel'); if (!s) return;
+  if (s.options.length < 2) { var o0 = el('option', null, 'Desligada'); o0.value = ''; s.appendChild(o0); LOOPS.forEach(function (l) { var o = el('option', null, l.name); o.value = l.id; s.appendChild(o); }); }
+  s.value = S.loop; $('#loopVol').value = S.loopVol; $('#loopVol').disabled = !S.loop;
+  $$('[data-action="loop:toggle"]').forEach(function (b) { b.classList.toggle('on', !!S.loop); });
+}
 var clickBufs = {}, metOn = false, metTimer = null, metNext = 0, metBeat = 0, beatQueue = [];
 function loadClicks() {
   var jobs = [];
@@ -515,6 +551,7 @@ function metTick() {
     var accent = S.accent && metBeat === 0;
     var buf = clickBufs[S.click + ':' + (accent ? 'accent' : 'normal')] || clickBufs[S.click + ':normal'];
     if (buf) { var s = ctx.createBufferSource(); s.buffer = buf; s.connect(A.metBus); s.start(metNext); }
+    if (S.loop) loopSteps(metNext, metBeat, 60 / S.bpm);
     beatQueue.push({ t: metNext, b: metBeat });
     metNext += 60 / S.bpm; metBeat = (metBeat + 1) % S.sig;
   }
@@ -572,6 +609,9 @@ function bindMetro() {
   $('#bpmRange').oninput = function (e) { setBpm(parseFloat(e.target.value)); };
   $('#bpmMinus').onclick = function () { setBpm(S.bpm - 1); };
   $('#bpmPlus').onclick = function () { setBpm(S.bpm + 1); };
+  renderLoop();
+  $('#loopSel').onchange = function () { loopSet(this.value); };
+  $('#loopVol').oninput = function () { S.loopVol = parseFloat(this.value); save(); };
   setBpm(S.bpm); renderBeats();
 }
 
@@ -623,6 +663,7 @@ function loadSong(i) {
   if (s.kit && kitList().indexOf(s.kit) >= 0 && s.kit !== S.kitSel) applyKit(s.kit, true);
   if (s.fx) { S.fx = Object.assign(JSON.parse(JSON.stringify(DEF.fx)), s.fx); renderFx(); }
   if (s.family2 !== undefined) { S.family2 = FAM[s.family2] ? s.family2 : ''; if (s.mix2 != null) S.mix2 = s.mix2; renderLayer(); }
+  if (s.loop !== undefined) { S.loop = LOOPBY[s.loop] ? s.loop : ''; if (S.loop) lastLoop = S.loop; renderLoop(); }
   applyAll(); setBpm(s.bpm); save();
   renderKeys(); renderFams(); renderSongs(); renderSongNow();
   if (padOn && ctx) padStart();
@@ -637,7 +678,7 @@ function songStep(d) {
 function bindSetlist() {
   $('#songAdd').onclick = function () {
     var t = $('#songTitle').value.trim() || ('Música ' + (S.setlist.length + 1));
-    S.setlist.push({ title: t.slice(0, 60), key: S.key, family: S.family, bpm: S.bpm, kit: S.kitSel, fx: JSON.parse(JSON.stringify(S.fx)), family2: S.family2, mix2: S.mix2 });
+    S.setlist.push({ title: t.slice(0, 60), key: S.key, family: S.family, bpm: S.bpm, kit: S.kitSel, fx: JSON.parse(JSON.stringify(S.fx)), family2: S.family2, mix2: S.mix2, loop: S.loop });
     $('#songTitle').value = ''; save(); renderSongs(); toast('Música salva');
   };
   $('#slExport').onclick = function () { download('aurapad-setlist.json', JSON.stringify({ setlist: S.setlist }, null, 1)); };
@@ -645,7 +686,7 @@ function bindSetlist() {
     var f = e.target.files[0]; if (!f) return;
     f.text().then(function (t) {
       var j = JSON.parse(t); if (!Array.isArray(j.setlist)) throw 0;
-      S.setlist = j.setlist.map(function (s) { return { title: String(s.title || '').slice(0, 60), key: NOTES.indexOf(s.key) >= 0 ? s.key : 'C', family: s.family, bpm: clamp(parseInt(s.bpm, 10) || 72, 30, 260), kit: typeof s.kit === 'string' ? s.kit : '', notes: typeof s.notes === 'string' ? s.notes.slice(0, 4000) : '', fade: isFinite(s.fade) ? clamp(+s.fade, 1, 12) : undefined, fx: s.fx && typeof s.fx === 'object' ? s.fx : undefined, family2: typeof s.family2 === 'string' ? s.family2 : undefined, mix2: isFinite(s.mix2) ? clamp(+s.mix2, 0, 1) : undefined }; });
+      S.setlist = j.setlist.map(function (s) { return { title: String(s.title || '').slice(0, 60), key: NOTES.indexOf(s.key) >= 0 ? s.key : 'C', family: s.family, bpm: clamp(parseInt(s.bpm, 10) || 72, 30, 260), kit: typeof s.kit === 'string' ? s.kit : '', notes: typeof s.notes === 'string' ? s.notes.slice(0, 4000) : '', fade: isFinite(s.fade) ? clamp(+s.fade, 1, 12) : undefined, fx: s.fx && typeof s.fx === 'object' ? s.fx : undefined, family2: typeof s.family2 === 'string' ? s.family2 : undefined, mix2: isFinite(s.mix2) ? clamp(+s.mix2, 0, 1) : undefined, loop: typeof s.loop === 'string' ? s.loop : undefined }; });
       S.songIdx = -1; save(); renderSongs(); renderSongNow(); toast('Setlist importada');
     }).catch(function () { toast('Arquivo inválido'); }); e.target.value = '';
   };
@@ -688,6 +729,8 @@ function doAction(a, vel) {
   else if (p[0] === 'padkey') padKeyTap(p[1]);
   else if (a === 'pad:toggle') padToggle();
   else if (a === 'pad:duck') duckToggle();
+  else if (a === 'loop:toggle') loopSet(S.loop ? '' : lastLoop);
+  else if (a === 'loop:next') { var i = LOOPS.findIndex(function (l) { return l.id === S.loop; }); loopSet(LOOPS[(i + 1) % LOOPS.length].id); }
   else if (p[0] === 'key') keyShift(parseInt(p[1], 10));
   else if (a === 'met:toggle') { if (metOn) metStop(); else metStart(); }
   else if (a === 'met:tap') tapTempo();
@@ -702,7 +745,7 @@ function actionName(a) {
   var p = a.split(':');
   if (p[0] === 'drum') return 'Drum pad ' + (parseInt(p[1], 10) + 1);
   if (p[0] === 'padkey') return 'Pad tom ' + LABEL[p[1]];
-  return { 'pad:toggle': 'Pad tocar/parar', 'pad:duck': 'Pad abaixar (voz)', 'key:1': 'Subir 1 semitom', 'key:-1': 'Descer 1 semitom', 'key:2': 'Subir 1 tom', 'key:-2': 'Descer 1 tom', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior' }[a] || a;
+  return { 'pad:toggle': 'Pad tocar/parar', 'pad:duck': 'Pad abaixar (voz)', 'loop:toggle': 'Bateria em loop ligar/desligar', 'loop:next': 'Próximo ritmo de bateria', 'key:1': 'Subir 1 semitom', 'key:-1': 'Descer 1 semitom', 'key:2': 'Subir 1 tom', 'key:-2': 'Descer 1 tom', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior' }[a] || a;
 }
 
 /* ---------- MIDI ---------- */
