@@ -395,14 +395,16 @@ function renderDrums() {
   if (!padEls.length) {
     for (var n = 0; n < 16; n++) {
       var p = el('div', 'dpad'); p.dataset.action = 'drum:' + n; p.dataset.fast = '1';
-      p.appendChild(el('b', null, String(n + 1))); p.appendChild(el('span'));
+      var top = el('div', 'dtop'); top.appendChild(el('b', null, String(n + 1))); top.appendChild(el('i', 'dic'));
+      p.appendChild(top); p.appendChild(el('span'));
       p.addEventListener('animationend', function () { this.classList.remove('hit'); });
       g.appendChild(p); padEls.push(p);
     }
   }
   S.kit.forEach(function (id, i) {
-    var m = drumMeta(id), p = padEls[i];
-    p.lastChild.textContent = kitLabel(i) || (m ? m.name : 'Vazio');
+    var p = padEls[i], ic = padIcon(i);
+    p.lastChild.textContent = padName(i);
+    p.querySelector('.dic').innerHTML = ic ? '<svg><use href="#d-' + ic + '"/></svg>' : '';
     p.classList.toggle('empty', !id);
   });
   $('#tab-drums').classList.toggle('editing', drumEditing);
@@ -424,6 +426,33 @@ function renderDrums() {
   sel.value = cur;
   if (!cur) { var o0 = el('option', null, 'Personalizado'); o0.value = ''; sel.insertBefore(o0, sel.firstChild); sel.value = ''; }
 }
+/* nome limpo da peça: sem "(kit 3)" e sem número, a não ser que haja outra peça igual no kit (Tom 1, Tom 2...) */
+function cleanName(n) {
+  var s = String(n || '').replace(/\s*\(\s*kit\s*\d+\s*\)/ig, '').replace(/_/g, ' ');
+  var num = null;
+  s = s.split(/\s+/).filter(function (t) { if (/^\d{1,2}$/.test(t)) { if (num === null) num = t; return false; } return !!t; }).join(' ');
+  s = s.replace(/\bfx\b/ig, 'FX').replace(/\befx\b/ig, 'EFX');
+  return { base: s ? s.charAt(0).toUpperCase() + s.slice(1) : '', num: num };
+}
+function rawName(i) { var m = drumMeta(S.kit[i]); return kitLabel(i) || (m ? m.name : ''); }
+function padName(i) {
+  if (!S.kit[i]) return 'Vazio';
+  var me = cleanName(rawName(i)), same = [];
+  S.kit.forEach(function (id, j) { if (id && cleanName(rawName(j)).base.toLowerCase() === me.base.toLowerCase()) same.push(j); });
+  if (same.length < 2) return me.base;
+  return me.base + ' ' + (me.num || String(same.indexOf(i) + 1));
+}
+/* ícone pelo tipo de som */
+function padIcon(i) {
+  var m = drumMeta(S.kit[i]); if (!m) return '';
+  var n = (rawName(i) + ' ' + (m.name || '')).toLowerCase(), c = (m.category || '').toLowerCase();
+  var rules = [[/clap/, 'clap'], [/snap/, 'snap'], [/hi-?hat/, 'hihat'], [/crash|cymbal|symbal|prato/, 'crash'], [/sub/, 'sub'], [/kick|bumbo/, 'kick'],
+    [/snare|caixa/, 'snare'], [/tom|tumb/, 'tom'], [/shaker|egg/, 'shaker'], [/tamb/, 'tamb'], [/wood|perc|blop|stick|block/, 'wood'],
+    [/boom|impact|explos|pressure/, 'boom'], [/swell|rise|reverse|whoosh/, 'rise'], [/noise|laser|lazer/, 'noise'], [/bell|chime/, 'bell']];
+  for (var k = 0; k < rules.length; k++) if (rules[k][0].test(n)) return rules[k][1];
+  var byCat = { kicks: 'kick', snares: 'snare', toms: 'tom', claps: 'clap', snaps: 'snap', shakers: 'shaker', tambs: 'tamb', woods: 'wood', sub: 'sub', 'hi-hats e pratos': 'hihat' };
+  return byCat[c] || 'fx';
+}
 function kitLabel(i) {
   var v = S.kitSel, r = null;
   if (v && v[0] === 'f') FACTORY_KITS.forEach(function (k) { if (k.name === v.slice(2) && k.ids[i] === S.kit[i] && k.labels) r = k.labels[i] || null; });
@@ -434,12 +463,12 @@ function renderDvols() {
   var box = $('#dvols'); if (!box) return; box.innerHTML = '';
   S.kit.forEach(function (id, i) {
     if (!id) return;
-    var m = drumMeta(id), name = kitLabel(i) || (m ? m.name : id);
+    var name = padName(i), ic = padIcon(i);
     var col = el('div', 'vcol');
     var o = el('b', 'vv', Math.round(S.dvol[i] * 100) + '');
     var f = el('div', 'vf'); f.tabIndex = 0; f.setAttribute('role', 'slider'); f.setAttribute('aria-label', 'Volume ' + name);
     f.innerHTML = '<i class="trk"><i class="fill"></i></i><i class="thumb"></i>';
-    var nm = el('button', 'vname', name); nm.title = 'Tocar ' + name; nm.dataset.action = 'drum:' + i; nm.dataset.fast = '1';
+    var nm = el('button', 'vname'); nm.innerHTML = (ic ? '<svg><use href="#d-' + ic + '"/></svg>' : ''); nm.appendChild(el('span', null, name)); nm.title = 'Tocar ' + name; nm.dataset.action = 'drum:' + i; nm.dataset.fast = '1';
     col.appendChild(o); col.appendChild(f); col.appendChild(nm); box.appendChild(col);
     function draw() { f.style.setProperty('--v', S.dvol[i]); o.textContent = Math.round(S.dvol[i] * 100); }
     function setv(v) { S.dvol[i] = clamp(v, 0, 1); draw(); if (padGain[i]) padGain[i].gain.value = S.dvol[i]; save(); }
@@ -487,7 +516,7 @@ function renderPicker() {
   var items = pickCat === 'Meus samples' ? Object.keys(userSamples).map(function (k) { return userSamples[k]; }) : CAT.drums.filter(function (d) { return d.category === pickCat; }).sort(byName);
   if (!items.length) list.appendChild(el('p', 'muted', pickCat === 'Meus samples' ? 'Nenhum sample importado ainda. Use "Importar samples" na aba Drums.' : 'Vazio.'));
   items.forEach(function (it) {
-    var row = el('div', 'item'); row.appendChild(el('span', 'nm', it.name));
+    var row = el('div', 'item'); row.appendChild(el('span', 'nm', String(it.name).replace(/\s*\(\s*kit\s*\d+\s*\)/ig, '')));
     var pv = el('button', null, '▶'); pv.onclick = function () { preview(it.id); };
     var use = el('button', 'primary', 'Usar'); use.onclick = function () {
       S.kit[pickTarget] = it.id; S.kitSel = ''; save(); getDrumBuffer(it.id); renderDrums(); $('#modal').classList.add('hidden');

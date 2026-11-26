@@ -587,3 +587,12 @@ body.learn [data-action]{outline:2px dashed var(--amber);outline-offset:2px}
   #tab-pads .keys{flex:0 0 auto;height:clamp(110px,16vh,200px)}
   #tab-pads .p-browse{flex:1 1 auto}
 }
+/* ícone do tipo de som nos pads */
+.dtop{display:flex;justify-content:space-between;align-items:flex-start}
+.dic svg{width:clamp(24px,4.6vmin,40px);height:clamp(24px,4.6vmin,40px);color:#a9aeb5;stroke-width:1.6}
+.dpad.hit .dic svg{color:#1b1206}
+.dpad.empty .dic{display:none}
+.vname{display:flex;align-items:center;justify-content:center;gap:5px}
+.vname svg{width:15px;height:15px;color:#8d939b;flex:none}
+.vname span{overflow:hidden;text-overflow:ellipsis}
+@media (max-width:600px){.vname svg{display:none}}
