@@ -21,7 +21,7 @@
   },
   {
    "id": "abba",
-   "name": "Abba",
+   "name": "Embrace",
    "category": "Worship",
    "files": {
     "C": "audio/pads/abba/C.m4a",
@@ -78,7 +78,7 @@
   },
   {
    "id": "agape-efx",
-   "name": "Agape EFX",
+   "name": "Radiance",
    "category": "Dark",
    "files": {
     "C": "audio/pads/agape-efx/C.m4a",
@@ -192,7 +192,7 @@
   },
   {
    "id": "glacial",
-   "name": "Glacial",
+   "name": "Prism",
    "category": "Shimmer",
    "files": {
     "C": "audio/pads/glacial/C.m4a",
@@ -230,7 +230,7 @@
   },
   {
    "id": "heavens",
-   "name": "Heavens",
+   "name": "Breathe",
    "category": "Shimmer",
    "files": {
     "C": "audio/pads/heavens/C.m4a",
@@ -325,7 +325,7 @@
   },
   {
    "id": "sky-bright",
-   "name": "Sky Bright",
+   "name": "Arrebol",
    "category": "Shimmer",
    "files": {
     "C": "audio/pads/sky-bright/C.m4a",
