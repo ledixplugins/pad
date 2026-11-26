@@ -6,5 +6,10 @@ contextBridge.exposeInMainWorld('auraDesktop', {
   store: { get: () => ipcRenderer.invoke('aura:store:get'), set: (k, v) => ipcRenderer.invoke('aura:store:set', k, v) },
   http: (url, body) => ipcRenderer.invoke('aura:http', url, body),
   openExternal: u => ipcRenderer.invoke('aura:open', u),
-  config: {}
+  config: {},
+  update: {
+    ready: () => ipcRenderer.invoke('aura:update:ready'),                 // avisa que a interface abriu bem; devolve {build, version, status}
+    apply: () => ipcRenderer.invoke('aura:update:apply'),                 // só quando o usuário clica em Atualizar
+    onStatus: cb => ipcRenderer.on('aura:update:status', (e, r) => cb(r))
+  }
 });

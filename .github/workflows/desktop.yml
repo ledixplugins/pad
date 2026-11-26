@@ -3,12 +3,14 @@ name: Instaladores (Windows e macOS)
 on:
   push:
     branches: [main]
-    paths: ['desktop/**', 'index.html', 'style.css', 'app.js', 'knob.js', 'stagelab.js', 'pager.js', 'licenca.js', 'catalog.json', 'audio/**', 'sf/**', '.github/workflows/desktop.yml']
+    paths: ['desktop/**', 'index.html', 'style.css', 'app.js', 'knob.js', 'stagelab.js', 'pager.js', 'licenca.js', 'update.js', 'catalog.json', 'audio/**', 'sf/**', 'tools/**', '.github/workflows/desktop.yml']
   workflow_dispatch:
 permissions:
   contents: write
 env:
   VERSAO: "1.0.0"
+  AURA_BUILD: ${{ github.run_number }}
+  AURA_NEEDS_SHELL: "1"      # suba para 2 (junto com SHELL_API em desktop/src/main.js) quando a mudança exigir reinstalar: casca Electron ou sons novos
 jobs:
   instalador-win:
     runs-on: windows-latest
@@ -79,3 +81,20 @@ jobs:
           gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1 \
             && gh release upload "$TAG" rel/* --clobber --repo "${{ github.repository }}" \
             || gh release create "$TAG" rel/* --repo "${{ github.repository }}" --target "${{ github.sha }}" --latest --title "AURA Pad $TAG" --notes "Instaladores do AURA Pad para Windows e macOS. Teste grátis de 15 dias. © 2026 Thiago R. Galvão."
+  atualizacao:
+    # publica a interface nova, assinada, para os apps já instalados se atualizarem sozinhos (sem reinstalar)
+    needs: publicar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Gerar e publicar o pacote de atualização assinado
+        env:
+          AURA_UPDATE_KEY: ${{ secrets.AURA_UPDATE_KEY }}
+          AURA_VERSAO: ${{ env.VERSAO }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$AURA_UPDATE_KEY" ]; then echo "::warning::Falta o segredo AURA_UPDATE_KEY: os instaladores foram publicados, mas sem pacote de atualização."; exit 0; fi
+          node tools/gerar_atualizacao.js aura-update.json
+          gh release upload "v${VERSAO}" aura-update.json --clobber --repo "${{ github.repository }}"
