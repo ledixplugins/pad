@@ -853,7 +853,7 @@ function bindSets() {
 /* ---------- ações (UI + MIDI) ---------- */
 function doAction(a, vel) {
   var p = a.split(':');
-  if (a === 'midi:pads' || a === 'midi:drums') { var kk = a === 'midi:pads' ? 'midiPadOff' : 'midiDrumOff'; S[kk] = !S[kk]; save(); midiGateUI(); toast((a === 'midi:pads' ? 'MIDI Pads: ' : 'MIDI Bateria: ') + (S[kk] ? 'desligado' : 'ligado')); return; }
+  if (a === 'midi:pads' || a === 'midi:drums') { var kk = a === 'midi:pads' ? 'midiPadOff' : 'midiDrumOff'; S[kk] = !S[kk]; save(); midiGateUI(); toast((a === 'midi:pads' ? 'MIDI nos pads: ' : 'MIDI na bateria: ') + (S[kk] ? 'desligado' : 'ligado')); return; }
   if (p[0] === 'vol') return;                      // volumes são controles contínuos (fader/knob): ver setVol
   if (p[0] === 'drum') playDrum(parseInt(p[1], 10), vel);
   else if (p[0] === 'padkey') padKeyTap(p[1]);
@@ -875,8 +875,11 @@ function doAction(a, vel) {
   else if (a === 'kit:prev') kitStep(-1);
 }
 function midiGateUI() {
-  [['midiPadsBtn', 'midiPadOff', 'MIDI Pads: '], ['midiDrumsBtn', 'midiDrumOff', 'MIDI Bateria: ']].forEach(function (x) {
-    var b = $('#' + x[0]); if (!b) return; b.classList.toggle('on', !S[x[1]]); b.textContent = x[2] + (S[x[1]] ? 'desligado' : 'ligado');
+  [['midi:pads', 'midiPadOff', 'pads'], ['midi:drums', 'midiDrumOff', 'bateria']].forEach(function (x) {
+    $$('[data-action="' + x[0] + '"]').forEach(function (b) {
+      b.classList.toggle('on', !S[x[1]]); b.setAttribute('aria-pressed', S[x[1]] ? 'false' : 'true');
+      b.title = 'Controlador MIDI toca ' + (x[2] === 'pads' ? 'os pads' : 'a bateria') + ': ' + (S[x[1]] ? 'desligado' : 'ligado') + '. Toque para ' + (S[x[1]] ? 'ligar' : 'desligar') + ' (use com o AURA Synth)';
+    });
   });
 }
 function actionName(a) {

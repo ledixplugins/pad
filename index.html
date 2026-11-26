@@ -106,6 +106,7 @@
         <button id="famPrev" class="hw icon" data-action="fam:prev" aria-label="Pad anterior"><svg><use href="#i-prev"/></svg></button>
         <div class="stepname"><small>Pad</small><select id="famSel" aria-label="Pad"></select></div>
         <button id="famNext" class="hw icon" data-action="fam:next" aria-label="Próximo pad"><svg><use href="#i-next"/></svg></button>
+        <button class="hw midigate on" data-action="midi:pads" title="Controlador MIDI toca os pads: ligado. Toque para desligar (use com o AURA Synth)" aria-label="Controlador MIDI nos pads">MIDI</button>
       </div>
       <div id="keys" class="keys"></div>
       <div class="status" id="status">
@@ -193,6 +194,7 @@
     <button id="kitPrev" class="hw icon" data-action="kit:prev" aria-label="Kit anterior"><svg><use href="#i-prev"/></svg></button>
     <div class="stepname"><small>Drum kit</small><select id="kitSel" aria-label="Kit de bateria"></select></div>
     <button id="kitNext" class="hw icon" data-action="kit:next" aria-label="Próximo kit"><svg><use href="#i-next"/></svg></button>
+    <button class="hw midigate on" data-action="midi:drums" title="Controlador MIDI toca a bateria: ligado. Toque para desligar (use com o AURA Synth)" aria-label="Controlador MIDI na bateria">MIDI</button>
   </div>
   <div id="drumGrid" class="drum-grid"></div>
   <div class="d-mix panel">
@@ -328,7 +330,7 @@
     <div id="midiStatus" class="lcdline">Verificando MIDI…</div>
     <small id="midiLast" class="lcdline dim">Última mensagem: nenhuma ainda</small>
     <small class="muted compat">Funciona com controladores USB e Bluetooth no Chrome e no Edge (computador e Android). O Safari do iPad não oferece Web MIDI.</small>
-    <div class="row volmap"><span class="vm-t">Volumes (fader ou knob)</span><button class="hw" data-action="vol:master" title="Para mapear: ative Mapear controles, toque aqui e mova o fader ou knob"><svg><use href="#i-link"/></svg>Volume master</button><button class="hw" data-action="vol:pad">Volume do pad</button><button class="hw" data-action="vol:drum">Volume da bateria</button><button class="hw on" data-action="midi:pads" id="midiPadsBtn" title="Desligue para o controlador não tocar os pads (use com o AURA Synth)">MIDI Pads: ligado</button><button class="hw on" data-action="midi:drums" id="midiDrumsBtn" title="Desligue para o controlador não tocar a bateria">MIDI Bateria: ligado</button></div>
+    <div class="row volmap"><span class="vm-t">Volumes (fader ou knob)</span><button class="hw" data-action="vol:master" title="Para mapear: ative Mapear controles, toque aqui e mova o fader ou knob"><svg><use href="#i-link"/></svg>Volume master</button><button class="hw" data-action="vol:pad">Volume do pad</button><button class="hw" data-action="vol:drum">Volume da bateria</button></div>
     <small class="muted about">AURA Pad · criado por Thiago R. Galvão · © 2026 · Todos os direitos reservados</small>
   </div>
   <div class="panel sec" data-v="ctl">
