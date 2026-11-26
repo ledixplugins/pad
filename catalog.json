@@ -2,7 +2,7 @@
  "pads": [
   {
    "id": "base",
-   "name": "Base",
+   "name": "Foundation",
    "category": "Analog",
    "files": {
     "C": "audio/pads/base/C.m4a",
@@ -40,7 +40,7 @@
   },
   {
    "id": "reverse",
-   "name": "Reverse",
+   "name": "Rewind",
    "category": "Dark",
    "files": {
     "C": "audio/pads/reverse/C.m4a",
@@ -59,7 +59,7 @@
   },
   {
    "id": "synth",
-   "name": "Synth",
+   "name": "Synth Glow",
    "category": "Analog",
    "files": {
     "C": "audio/pads/synth/C.m4a",
@@ -97,7 +97,7 @@
   },
   {
    "id": "analog-2",
-   "name": "Analog 2",
+   "name": "Analog Soft",
    "category": "Analog",
    "files": {
     "C": "audio/pads/analog-2/C.m4a",
@@ -116,7 +116,7 @@
   },
   {
    "id": "analog",
-   "name": "Analog",
+   "name": "Analog Deep",
    "category": "Analog",
    "files": {
     "C": "audio/pads/analog/C.m4a",
@@ -154,7 +154,7 @@
   },
   {
    "id": "dark",
-   "name": "Dark",
+   "name": "Abyss",
    "category": "Dark",
    "files": {
     "C": "audio/pads/dark/C.m4a",
@@ -287,7 +287,7 @@
   },
   {
    "id": "shimmer",
-   "name": "Shimmer",
+   "name": "Shimmer Classic",
    "category": "Shimmer",
    "files": {
     "C": "audio/pads/shimmer/C.m4a",
@@ -306,7 +306,7 @@
   },
   {
    "id": "shimmer-2",
-   "name": "Shimmer 2",
+   "name": "Shimmer Soft",
    "category": "Shimmer",
    "files": {
     "C": "audio/pads/shimmer-2/C.m4a",
@@ -344,7 +344,7 @@
   },
   {
    "id": "worship-pad",
-   "name": "Worship Pad",
+   "name": "Worship Standard",
    "category": "Worship",
    "files": {
     "C": "audio/pads/worship-pad/C.m4a",
