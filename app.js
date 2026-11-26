@@ -853,6 +853,7 @@ function bindSets() {
 /* ---------- ações (UI + MIDI) ---------- */
 function doAction(a, vel) {
   var p = a.split(':');
+  if (a === 'midi:pads' || a === 'midi:drums') { var kk = a === 'midi:pads' ? 'midiPadOff' : 'midiDrumOff'; S[kk] = !S[kk]; save(); midiGateUI(); toast((a === 'midi:pads' ? 'MIDI Pads: ' : 'MIDI Bateria: ') + (S[kk] ? 'desligado' : 'ligado')); return; }
   if (p[0] === 'vol') return;                      // volumes são controles contínuos (fader/knob): ver setVol
   if (p[0] === 'drum') playDrum(parseInt(p[1], 10), vel);
   else if (p[0] === 'padkey') padKeyTap(p[1]);
@@ -873,11 +874,16 @@ function doAction(a, vel) {
   else if (a === 'kit:next') kitStep(1);
   else if (a === 'kit:prev') kitStep(-1);
 }
+function midiGateUI() {
+  [['midiPadsBtn', 'midiPadOff', 'MIDI Pads: '], ['midiDrumsBtn', 'midiDrumOff', 'MIDI Bateria: ']].forEach(function (x) {
+    var b = $('#' + x[0]); if (!b) return; b.classList.toggle('on', !S[x[1]]); b.textContent = x[2] + (S[x[1]] ? 'desligado' : 'ligado');
+  });
+}
 function actionName(a) {
   var p = a.split(':');
   if (p[0] === 'drum') return 'Drum pad ' + (parseInt(p[1], 10) + 1);
   if (p[0] === 'padkey') return 'Pad tom ' + LABEL[p[1]];
-  return { 'pad:toggle': 'Pad tocar/parar', 'pad:duck': 'Pad abaixar (voz)', 'loop:toggle': 'Bateria em loop ligar/desligar', 'loop:next': 'Próximo ritmo de bateria', 'key:1': 'Subir 1 semitom', 'key:-1': 'Descer 1 semitom', 'key:2': 'Subir 1 tom', 'key:-2': 'Descer 1 tom', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior', 'vol:master': 'Volume master (fader ou knob)', 'vol:pad': 'Volume do pad (fader ou knob)', 'vol:drum': 'Volume da bateria (fader ou knob)' }[a] || a;
+  return { 'pad:toggle': 'Pad tocar/parar', 'pad:duck': 'Pad abaixar (voz)', 'loop:toggle': 'Bateria em loop ligar/desligar', 'loop:next': 'Próximo ritmo de bateria', 'key:1': 'Subir 1 semitom', 'key:-1': 'Descer 1 semitom', 'key:2': 'Subir 1 tom', 'key:-2': 'Descer 1 tom', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior', 'midi:pads': 'Ligar/desligar MIDI dos Pads', 'midi:drums': 'Ligar/desligar MIDI da Bateria', 'vol:master': 'Volume master (fader ou knob)', 'vol:pad': 'Volume do pad (fader ou knob)', 'vol:drum': 'Volume da bateria (fader ou knob)' }[a] || a;
 }
 
 /* ---------- MIDI ---------- */
@@ -953,7 +959,9 @@ function onMidi(e) {
     toast(actionName(armed) + ' ← ' + midiLabel(key)); armed = null; $('#midiHint').textContent = 'Mapeado. Toque em outro botão ou desative o modo.';
     return;
   }
-  var a = lookupAction(key, ch); if (a) doAction(a, v / 127);
+  var a = lookupAction(key, ch);
+  if (a && ((S.midiPadOff && a.indexOf('padkey:') === 0) || (S.midiDrumOff && a.indexOf('drum:') === 0))) return;   // desligado para usar o controlador com o AURA Synth
+  if (a) doAction(a, v / 127);
 }
 function connectInputs() {
   if (!midiAccess) return;
@@ -1179,7 +1187,7 @@ function downloadAll() {
 function boot() {
   if ('serviceWorker' in navigator && !window.auraDesktop) navigator.serviceWorker.register('sw.js').catch(function () {});
   loadCatalog().then(function () {
-    renderFams(); renderKeys(); renderPadBtn(); bindFx(); renderFx(); bindSets(); bindSetlist(); bindMidi(); renderMidiMap();
+    renderFams(); renderKeys(); renderPadBtn(); bindFx(); renderFx(); bindSets(); bindSetlist(); bindMidi(); renderMidiMap(); midiGateUI();
     bindMetro(); bindLive(); bindLists(); renderSongs(); renderSongNow(); bindUI(); bindSafety();
     loadUserSamples().then(renderDrums);
     renderDrums();

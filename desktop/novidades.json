@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.0.6",
+    "date": "2026-11-26",
+    "titulo": "Usar o controlador com o AURA Synth",
+    "itens": [
+      "Na aba MIDI há dois botões novos: MIDI Pads e MIDI Bateria. Desligados, o controlador não toca aquele sistema, então você alterna entre o Pad e o Synth sem conflito.",
+      "Os dois botões também podem ser mapeados num botão do controlador, para alternar sem tocar na tela.",
+      "A escolha fica salva ao fechar o app."
+    ]
+  },
+  {
     "version": "1.0.5",
     "date": "2026-11-26",
     "titulo": "Bateria com volume parelho e resposta mais rápida",

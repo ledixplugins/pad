@@ -664,4 +664,5 @@ body.learn [data-action]{outline:2px dashed var(--amber);outline-offset:2px}
 
 /* MIDI: botões para mapear volumes contínuos (fader ou knob) */
 .volmap{flex-wrap:wrap;gap:6px;align-items:center}.volmap .vm-t{flex:1 0 100%;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-@media (orientation:landscape) and (max-height:500px){.volmap{gap:4px}.volmap .vm-t{display:none}.volmap .hw{padding:6px 8px;min-height:32px;font-size:11px}.volmap .hw svg{display:none}#tab-midi .compat{display:none}}
+@media (orientation:landscape) and (max-height:500px){.volmap{gap:4px}.volmap .vm-t{display:none}.volmap .hw{padding:6px 8px;min-height:32px;font-size:11px}.volmap .hw svg{display:none}#tab-midi .compat,#tab-midi .about{display:none}}
+@media (orientation:landscape) and (max-height:340px){.volmap{gap:3px}.volmap .hw{padding:3px 6px;min-height:26px;font-size:10px}#tab-midi #midiHint{display:none}}
