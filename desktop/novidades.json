@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.0.1",
+    "date": "2026-11-26",
+    "titulo": "Identificação de autoria",
+    "itens": [
+      "O AURA Pad agora mostra que foi criado por Thiago R. Galvão e passa essa marca para os backups e setlists que você exporta.",
+      "Nenhuma mudança no som nem nos seus ajustes."
+    ]
+  },
+  {
     "version": "1.0.0",
     "date": "2026-11-26",
     "titulo": "Primeira versão",

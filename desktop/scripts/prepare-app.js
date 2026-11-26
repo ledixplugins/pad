@@ -1,3 +1,4 @@
+// AURA Pad · © 2026 Thiago R. Galvão. Todos os direitos reservados. ID: AURA-PD-TRG-2026
 // Copia a interface do Aura Pad (raiz do repositório) e todos os sons para desktop/app antes de empacotar.
 const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..', '..'), out = path.join(__dirname, '..', 'app');

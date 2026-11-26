@@ -1,4 +1,4 @@
-/* AURA Pad — aviso de nova versão (só existe no app instalado). © 2026 Thiago R. Galvão.
+/* AURA Pad — aviso de nova versão (só existe no app instalado). © 2026 Thiago R. Galvão. Todos os direitos reservados. ID: AURA-PD-TRG-2026
    O app procura atualização UMA vez ao abrir. Se houver, aparece o selo "NOVA VERSÃO" no cabeçalho;
    ao clicar, o usuário vê o que mudou e decide. Nada é baixado nem aplicado sem o clique. */
 (function(){

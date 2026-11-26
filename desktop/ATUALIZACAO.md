@@ -18,3 +18,5 @@
 **Publicação.** Push em `main` que mude a interface ou `desktop/**` roda `.github/workflows/desktop.yml`: gera os instaladores e, no job `atualizacao`, o `aura-update.json` (número = `github.run_number`), enviado à Release `v1.0.0`. Sem o segredo, o job só avisa e os instaladores saem normalmente.
 
 **Teste:** `node tests/atualizacao.js`.
+
+**Chave:** segredo AURA_UPDATE_KEY criado em 26/11/2026 (par próprio do AURA Pad; guarde a chave privada só no GitHub).

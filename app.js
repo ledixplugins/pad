@@ -1,6 +1,9 @@
-/* Aura Pad — pads infinitos, drum pads, metrônomo, setlist e MIDI (Web Audio, sem dependências) */
+/* Aura Pad — pads infinitos, drum pads, metrônomo, setlist e MIDI (Web Audio, sem dependências)
+   © 2026 Thiago R. Galvão. Todos os direitos reservados. ID: AURA-PD-TRG-2026 */
 (function () {
 'use strict';
+var AURA_AUTOR = 'Thiago R. Galvão', AURA_ANO = 2026, AURA_ID = 'AURA-PD-TRG-2026';
+try { console.log('%cAURA PAD%c © 2026 ' + AURA_AUTOR + ' — todos os direitos reservados', 'font-weight:700;color:#ffab2e', ''); } catch (e) { console.warn(e); }
 
 var NOTES = ['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
 var LABEL = {C:'C',Cs:'C#',D:'D',Ds:'D#',E:'E',F:'F',Fs:'F#',G:'G',Gs:'G#',A:'A',As:'A#',B:'B'};
@@ -805,7 +808,7 @@ function bindSetlist() {
     S.setlist.push({ title: t.slice(0, 60), key: S.key, family: S.family, bpm: S.bpm, kit: S.kitSel, fx: JSON.parse(JSON.stringify(S.fx)), family2: S.family2, mix2: S.mix2, loop: S.loop });
     $('#songTitle').value = ''; save(); renderSongs(); toast('Música salva');
   };
-  $('#slExport').onclick = function () { download('aurapad-setlist.json', JSON.stringify({ setlist: S.setlist }, null, 1)); };
+  $('#slExport').onclick = function () { download('aurapad-setlist.json', JSON.stringify({ origem: AURA_ID + ' © ' + AURA_ANO + ' ' + AURA_AUTOR, setlist: S.setlist }, null, 1)); };
   $('#slImport').onchange = function (e) {
     var f = e.target.files[0]; if (!f) return;
     f.text().then(function (t) {
@@ -987,7 +990,7 @@ function bindLists() {
 function bindSafety() {
   $('#bkExport').onclick = function () {
     var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
-    download('aurapad-backup-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '.json', JSON.stringify({ aurapad: 1, state: S }, null, 1));
+    download('aurapad-backup-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '.json', JSON.stringify({ aurapad: 1, origem: AURA_ID + ' © ' + AURA_ANO + ' ' + AURA_AUTOR, state: S }, null, 1));
     toast('Backup salvo (setlist, kits, StageLab e vínculos MIDI)');
   };
   $('#bkImport').onchange = function (e) {

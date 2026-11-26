@@ -1,4 +1,5 @@
-/* Aura Pad — knobs giratórios no estilo do AURA Synth Bass.
+/* © 2026 Thiago R. Galvão. Todos os direitos reservados. ID: AURA-PD-TRG-2026
+   Aura Pad — knobs giratórios no estilo do AURA Synth Bass.
    Transforma <input type="range" data-knob="Rótulo"> num knob; o input continua sendo a fonte do valor
    (os eventos input/change são disparados normalmente), então o resto do app não muda. */
 (function () {

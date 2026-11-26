@@ -5,3 +5,5 @@ AURA PAD - teste local
 3) O navegador abre em http://localhost:8123/ . Toque em "Tocar para iniciar o áudio".
 Para parar: feche a janela do Terminal.
 Use Chrome ou Edge no Mac (têm Web MIDI para o teclado/controladora).
+
+AURA Pad © 2026 Thiago R. Galvão (Ledix Plugins). Todos os direitos reservados. Veja LICENSE.

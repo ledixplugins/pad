@@ -1,4 +1,5 @@
-/* Aura Pad — regra de ouro: nada rola. Listas que não cabem na tela viram páginas (‹ 1/2 ›),
+/* © 2026 Thiago R. Galvão. Todos os direitos reservados. ID: AURA-PD-TRG-2026
+   Aura Pad — regra de ouro: nada rola. Listas que não cabem na tela viram páginas (‹ 1/2 ›),
    com deslize lateral. Cada lista calcula quantos itens cabem e se refaz ao girar ou redimensionar. */
 (function () {
   'use strict';

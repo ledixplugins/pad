@@ -1,5 +1,5 @@
 // Atualização do app sem reinstalar: baixa a interface nova (um pacote assinado), confere a assinatura e guarda ao lado do app.
-// © 2026 Thiago R. Galvão. Todos os direitos reservados.
+// © 2026 Thiago R. Galvão. Todos os direitos reservados. ID: AURA-PD-TRG-2026
 const crypto = require('crypto'), fs = require('fs'), path = require('path');
 
 const OK_NOME = /^[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+)*$/;     // só nomes simples, sem "..", sem caminho absoluto

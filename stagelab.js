@@ -1,4 +1,5 @@
-/* StageLab — mixer de instrumentos em camadas + teclado de palco.
+/* AURA Pad · © 2026 Thiago R. Galvão. Todos os direitos reservados. ID: AURA-PD-TRG-2026
+   StageLab — mixer de instrumentos em camadas + teclado de palco.
    - 8 instrumentos (sons gravados do GeneralUser GS + 1 synth), cada um com fader; todos tocam juntos.
    - 8 efeitos globais com knob e botão liga/desliga: Cutoff, Release, Comp, Reverb, Delay, Low, Mid, High.
    - Transpor, Oitava, Sets (fábrica + do usuário) com Salvar/Sobrescrever/Excluir.

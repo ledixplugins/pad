@@ -1,3 +1,4 @@
+// AURA Pad · © 2026 Thiago R. Galvão. Todos os direitos reservados. ID: AURA-PD-TRG-2026
 // Gera o pacote de atualização assinado (aura-update.json) com a interface atual do AURA Pad (sem os sons: eles ficam no instalador).
 // Uso: AURA_UPDATE_KEY="<chave privada PEM>" AURA_BUILD=<número crescente> AURA_VERSAO=1.0.0 node tools/gerar_atualizacao.js [saida.json]
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
