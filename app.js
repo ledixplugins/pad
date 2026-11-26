@@ -1020,6 +1020,18 @@ function bindSafety() {
     setTimeout(function () { if (ctx.state !== 'running') { unlocked = false; toast('Sem som? Toque de novo na tela e verifique o volume e o modo silencioso do celular.'); } }, 1200);
   }
   ['pointerdown', 'touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, unlock, true); });
+  // horizontal: em celular e tablet o app usa a tela deitada; no Android trava a rotação (tela cheia)
+  var touch = window.matchMedia && matchMedia('(pointer:coarse)').matches;
+  var canLock = !!(screen.orientation && screen.orientation.lock && document.documentElement.requestFullscreen);
+  function lockLandscape() {
+    if (!touch || !canLock) return;
+    var go = function () { return screen.orientation.lock('landscape').catch(function () {}); };
+    if (document.fullscreenElement || matchMedia('(display-mode: standalone)').matches) go();
+    else document.documentElement.requestFullscreen({ navigationUI: 'hide' }).then(go, function () {});
+  }
+  if (canLock && touch) { $('#rotLock').hidden = false; $('#rotHint').hidden = true; }
+  $('#rotLock').onclick = lockLandscape;
+  if (touch && canLock) document.addEventListener('pointerdown', function first() { document.removeEventListener('pointerdown', first, true); lockLandscape(); }, true);
   // tela sempre ligada enquanto o app está aberto
   var wl = null;
   var wlBusy = false;

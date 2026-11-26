@@ -647,3 +647,16 @@ body.learn [data-action]{outline:2px dashed var(--amber);outline-offset:2px}
   .d-kits #drumMsg{display:none}
   .d-kits .hw,.d-kits input{min-height:32px}
 }
+
+/* ===== celular e tablet: só na horizontal ===== */
+#rotate{display:none}
+@media (orientation:portrait) and (pointer:coarse){
+  #rotate{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px;text-align:center;
+    background:radial-gradient(120% 80% at 50% 0%,#1d1f23 0,#0c0d0e 100%)}
+  #rotate b{font-size:20px;letter-spacing:.02em}
+  #rotate span{color:var(--muted);max-width:30ch;line-height:1.4}
+  #rotate small{color:var(--faint);max-width:34ch;line-height:1.4;font-size:12px}
+  #rotate .rot-ic{width:96px;height:96px;color:var(--amber);stroke-width:2.4;animation:rot 2.4s ease-in-out infinite}
+  body > :not(#rotate):not(svg){visibility:hidden}
+}
+@keyframes rot{0%,20%{transform:rotate(0)}50%,80%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
