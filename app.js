@@ -900,6 +900,22 @@ function bindSafety() {
   $('#songNow').onclick = showNotes; $('#notesClose').onclick = function () { $('#notesBox').classList.add('hidden'); };
   // pede armazenamento persistente (evita que o Safari/Chrome apaguem os dados)
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  // desbloqueio de áudio em celulares: sessão "playback" (ignora o botão de silêncio do iPhone) + toque mudo
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  var unlocked = false;
+  function unlock() {
+    if (!ctx) return;
+    if (ctx.state !== 'running') ctx.resume().catch(function () {});
+    if (unlocked) return; unlocked = true;
+    try { var b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource(); s.buffer = b; s.connect(ctx.destination); s.start(0); } catch (e) {}
+    try {
+      var au = document.createElement('audio'); au.setAttribute('playsinline', ''); au.loop = true; au.volume = 0.01;
+      au.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=';
+      var pr = au.play(); if (pr && pr.catch) pr.catch(function () {});
+    } catch (e) {}
+    setTimeout(function () { if (ctx.state !== 'running') { unlocked = false; toast('Sem som? Toque de novo na tela e verifique o volume e o modo silencioso do celular.'); } }, 1200);
+  }
+  ['pointerdown', 'touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, unlock, true); });
   // tela sempre ligada enquanto o app está aberto
   var wl = null;
   function wake() { try { if (navigator.wakeLock && !document.hidden && !wl) navigator.wakeLock.request('screen').then(function (l) { wl = l; l.addEventListener('release', function () { wl = null; }); }, function () {}); } catch (e) {} }
