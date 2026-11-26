@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.0.5",
+    "date": "2026-11-26",
+    "titulo": "Bateria com volume parelho e resposta mais rápida",
+    "itens": [
+      "Todos os 199 sons da bateria foram nivelados: nenhum efeito soa muito mais alto que os outros.",
+      "O silêncio no começo de alguns sons foi cortado, então o efeito sai assim que você toca o pad.",
+      "Toques leves no controlador MIDI agora também soam, e toques rápidos em sequência respondem melhor."
+    ]
+  },
+  {
     "version": "1.0.4",
     "date": "2026-11-26",
     "titulo": "Pads do controlador MIDI no canal certo",

@@ -362,7 +362,7 @@ function getDrumBuffer(id) {
   if (DRUM[id]) p = fetchBuf(DRUM[id].file);
   else if (userSamples[id]) p = idbGet(id).then(function (rec) { return decode(rec.data.slice(0)); });
   else return Promise.resolve(null);
-  drumLoading[id] = p.then(function (b) { drumBufs[id] = b; delete drumLoading[id]; return b; }, function () { delete drumLoading[id]; return null; });
+  drumLoading[id] = p.then(function (b) { var m = DRUM[id]; if (b && m) { b._g = m.g || 1; b._o = m.o || 0; } drumBufs[id] = b; delete drumLoading[id]; return b; }, function () { delete drumLoading[id]; return null; });
   return drumLoading[id];
 }
 function preloadKit() { S.kit.forEach(function (id) { getDrumBuffer(id); }); }
@@ -374,8 +374,8 @@ function padOut(i) {
 function trigger(i, buf, vel, when) {
   var t = when || ctx.currentTime;
   var src = ctx.createBufferSource(); src.buffer = buf;
-  var g = ctx.createGain(); g.gain.value = clamp(vel, 0.05, 1);
-  src.connect(g); g.connect(padOut(i)); src.start(t);
+  var g = ctx.createGain(); g.gain.value = clamp(vel, 0.05, 1) * (buf._g || 1);
+  src.connect(g); g.connect(padOut(i)); src.start(t, buf._o || 0);
   // no máximo 3 vozes por pad: a mais antiga some rápido (evita acúmulo em pratos e repiques)
   var vs = padVoices[i] || (padVoices[i] = []);
   vs.push({ s: src, g: g });
@@ -391,6 +391,7 @@ function flashPad(i) {
 function playDrum(i, vel) {
   if (!ctx) return;
   var id = S.kit[i], v = vel == null ? 1 : vel, b = drumBufs[id];
+  if (v < 1) v = 0.35 + 0.65 * Math.pow(v, 0.7);   // toque leve no controlador ainda soa
   if (b) trigger(i, b, v);
   else getDrumBuffer(id).then(function (bb) { if (bb) trigger(i, bb, v); });
 }
