@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0b0a09">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,258 +15,329 @@
 <title>Aura Pad</title>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><ellipse cx="12" cy="8" rx="8" ry="3"/><path d="M4 8v8c0 1.7 3.6 3 8 3s8-1.3 8-3V8"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+    <symbol id="i-keys" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v9M12 5v9M16 5v9M8 14v5M12 14v5M16 14v5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+    <symbol id="t-live" viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/></symbol>
+    <symbol id="t-pads" viewBox="0 0 24 24"><path d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0 3.5-4 5-2"/></symbol>
+    <symbol id="t-drums" viewBox="0 0 24 24"><ellipse cx="12" cy="9" rx="8" ry="3.2"/><path d="M4 9v6c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2V9"/><path d="M15 3l-4 6M9 3l4 6"/></symbol>
+    <symbol id="t-fx" viewBox="0 0 24 24"><path d="M6 3v18M12 3v18M18 3v18"/><rect x="4" y="13" width="4" height="3" rx="1" fill="currentColor"/><rect x="10" y="7" width="4" height="3" rx="1" fill="currentColor"/><rect x="16" y="15" width="4" height="3" rx="1" fill="currentColor"/></symbol>
+    <symbol id="t-metro" viewBox="0 0 24 24"><path d="M9 3h6l4 18H5z"/><path d="M12 16l5-9"/></symbol>
+    <symbol id="t-setlist" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1.2" fill="currentColor"/><circle cx="4.5" cy="12" r="1.2" fill="currentColor"/><circle cx="4.5" cy="18" r="1.2" fill="currentColor"/></symbol>
+    <symbol id="t-midi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="7.5" cy="12" r="1.1" fill="currentColor"/><circle cx="16.5" cy="12" r="1.1" fill="currentColor"/><circle cx="9" cy="8.5" r="1.1" fill="currentColor"/><circle cx="15" cy="8.5" r="1.1" fill="currentColor"/><circle cx="12" cy="7.3" r="1.1" fill="currentColor"/></symbol>
+  </defs>
+</svg>
 
+<div class="cheek l" aria-hidden="true"></div>
+<div class="cheek r" aria-hidden="true"></div>
 
-<header>
-  <div class="logo small">Aura <span>Pad</span></div>
-  <div class="song-now" id="songNow">—</div>
+<header class="hdr">
+  <div class="brand" aria-label="Aura Pad">
+    <svg class="wordmark" viewBox="0 0 540 160" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="22"><polyline points="20,148 70,16 120,148"/><path d="M160 16 V96 a40 40 0 0 0 80 0 V16"/><path d="M290 148 V27 H337 a32 32 0 0 1 0 64 H290 M334 91 L378 148"/><polyline points="420,148 470,16 520,148"/></g><g fill="none" stroke="#E8890C" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M40 104 C 52 84, 58 84, 70 104 S 88 124, 100 104"/><path d="M440 108 H456 V92 H484 V108 H500"/></g></svg>
+    <span class="sub">PAD</span>
+  </div>
+  <button class="oled" id="songNow" title="Música atual: toque para ver notas e letra">
+    <span class="led" id="oledLed"></span>
+    <span class="txt"><b id="oledMain">TOM C · SHIMMER</b><span id="oledSub">Nenhuma música carregada</span></span>
+  </button>
   <div class="hdr-right">
-    <label class="mini">Master <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.9"></label>
-    <button id="btnLock" title="Travar a tela (segure 1,5 s para destravar)" aria-label="Travar a tela">🔒</button>
-    <button id="btnPanic" class="danger" title="Parar tudo">■ Parar</button>
+    <label class="master"><span>Master</span><input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.9"></label>
+    <button id="btnLock" class="hw icon" title="Travar a tela" aria-label="Travar a tela"><svg><use href="#i-lock"/></svg></button>
+    <button id="btnPanic" class="hw panic" title="Parar tudo"><i></i>Pânico</button>
   </div>
 </header>
 
-<nav id="tabs">
-  <button data-tab="live" class="on">Palco</button>
-  <button data-tab="pads">Pads</button>
-  <button data-tab="drums">Drums</button>
-  <button data-tab="fx">StageLab</button>
-  <button data-tab="metro">Metrônomo</button>
-  <button data-tab="setlist">Setlist</button>
-  <button data-tab="midi">MIDI</button>
+<nav id="tabs" aria-label="Seções">
+  <button data-s="Palco" data-tab="live" class="on"><svg><use href="#t-live"/></svg><span>Palco</span></button>
+  <button data-s="Pads" data-tab="pads"><svg><use href="#t-pads"/></svg><span>Pads</span></button>
+  <button data-s="Drums" data-tab="drums"><svg><use href="#t-drums"/></svg><span>Drums</span></button>
+  <button data-s="Stage" data-tab="fx"><svg><use href="#t-fx"/></svg><span>StageLab</span></button>
+  <button data-s="Metrô" data-tab="metro"><svg><use href="#t-metro"/></svg><span>Metrônomo</span></button>
+  <button data-s="Setlist" data-tab="setlist"><svg><use href="#t-setlist"/></svg><span>Setlist</span></button>
+  <button data-s="MIDI" data-tab="midi"><svg><use href="#t-midi"/></svg><span>MIDI</span></button>
 </nav>
 
 <main>
 
-<!-- PADS -->
-<section id="tab-pads" class="tab">
-  <div class="row between">
-    <h2>Pad infinito</h2>
-    <div class="row gap">
-      <button id="padToggle" data-action="pad:toggle" class="primary">▶ Tocar</button>
+<!-- PADS (também usado no Palco) -->
+<section id="tab-pads" class="tab" data-sv="play">
+  <div class="tabhead">
+    <div class="seg sv" role="tablist"><button class="on" data-sv="play">Tocar</button><button data-sv="browse" class="phone-only">Timbres</button><button data-sv="adj">Ajustes</button></div>
+    <div class="row hdbtns adjonly"><button id="fxReset" class="hw">Zerar efeitos</button><button id="btnOffline" class="hw" title="Baixa todos os sons para tocar sem internet (cerca de 170 MB)">Offline</button><progress id="offProg" value="0" max="1" hidden></progress><small id="offMsg" class="muted"></small></div>
+  </div>
+
+  <div class="p-play">
+    <div class="p-left">
+      <div class="stepbar padbar">
+        <button id="famPrev" class="hw icon" data-action="fam:prev" aria-label="Pad anterior"><svg><use href="#i-prev"/></svg></button>
+        <div class="stepname"><small>Pad</small><select id="famSel" aria-label="Pad"></select></div>
+        <button id="famNext" class="hw icon" data-action="fam:next" aria-label="Próximo pad"><svg><use href="#i-next"/></svg></button>
+      </div>
+      <div id="keys" class="keys"></div>
+      <div class="status" id="status">
+        <div class="disp">
+          <button class="hw icon step" data-action="key:-1" aria-label="Descer meio tom"><svg><use href="#i-minus"/></svg></button>
+          <div class="dk"><small>Tom</small><b id="stKey">C</b><span id="stPad"></span><span id="stKit" hidden></span></div>
+          <button class="hw icon step" data-action="key:1" aria-label="Subir meio tom"><svg><use href="#i-plus"/></svg></button>
+        </div>
+        <button id="stBtn" class="playbtn" data-action="pad:toggle" aria-label="Tocar ou parar o pad"><svg><use href="#i-play"/></svg></button>
+      </div>
+      <div class="tiles live-extra">
+        <button class="tile" data-action="key:2" title="Sobe 1 tom inteiro com crossfade (refrão final)"><svg><use href="#i-up"/></svg><span>Modular +1</span></button>
+        <button class="tile toggle" data-action="pad:duck" title="Abaixa o pad enquanto você fala"><svg><use href="#i-mic"/></svg><span>Falar</span><i class="dot"></i></button>
+        <button class="tile toggle" data-action="loop:toggle" title="Liga a bateria em loop junto com o metrônomo"><svg><use href="#i-loop"/></svg><span>Loop</span><i class="dot"></i></button>
+      </div>
+    </div>
+    <div class="p-browse">
+      <div class="sec-t">Timbres</div>
+      <div id="famCats" class="seg chips"></div>
+      <div id="fams" class="fams"></div>
     </div>
   </div>
-  <div class="padbar bar">
-    <span class="lbl">Pad</span>
-    <button id="famPrev" data-action="fam:prev" title="Pad anterior">◀</button>
-    <select id="famSel" aria-label="Pad"></select>
-    <button id="famNext" data-action="fam:next" title="Próximo pad">▶</button>
+
+  <div class="p-adj">
+    <div class="panel sec">
+      <div class="sec-t">Saída</div>
+      <div class="knobs">
+        <input type="range" id="padVol" min="0" max="1" step="0.01" value="0.8" data-knob="Volume">
+        <input type="range" id="fxRev" min="0" max="1" step="0.01" value="0.25" data-knob="Reverb">
+        <input type="range" id="fxPan" min="-1" max="1" step="0.01" value="0" data-knob="Pan" data-center="1">
+      </div>
+    </div>
+    <div class="panel sec">
+      <div class="sec-t">Timbre</div>
+      <div class="knobs">
+        <input type="range" id="fxCut" min="0" max="1" step="0.001" value="1" data-knob="Cutoff">
+        <input type="range" id="fxLow" min="-12" max="12" step="0.5" value="0" data-knob="Graves" data-center="1">
+        <input type="range" id="fxHigh" min="-12" max="12" step="0.5" value="0" data-knob="Agudos" data-center="1">
+      </div>
+    </div>
+    <div class="panel sec">
+      <div class="sec-t">Compressor</div>
+      <div class="knobs">
+        <button id="fxComp" class="hw rocker toggle" aria-label="Compressor liga/desliga"><b>On</b><b>Off</b></button>
+        <input type="range" id="fxTh" min="-50" max="0" step="1" value="-24" data-knob="Threshold">
+        <input type="range" id="fxRa" min="1.5" max="12" step="0.5" value="4" data-knob="Ratio">
+      </div>
+    </div>
+    <div class="panel sec">
+      <div class="sec-t">Movimento</div>
+      <div class="knobs">
+        <input type="range" id="padFade" min="0.5" max="12" step="0.5" value="4" data-knob="Troca de tom">
+        <input type="range" id="padLoop" min="2" max="10" step="0.5" value="5" data-knob="Emenda">
+        <label class="selbox wide"><small>Swell ao iniciar</small><select id="swellSel"><option value="0">Desligado</option><option value="1">1 compasso</option><option value="2">2 compassos</option><option value="4">4 compassos</option><option value="8">8 compassos</option></select></label>
+      </div>
+    </div>
+    <div class="panel sec">
+      <div class="sec-t">Pulso</div>
+      <div class="knobs">
+        <input type="range" id="pulseDepth" min="0.1" max="1" step="0.05" value="0.5" data-knob="Intensidade">
+        <label class="selbox wide"><small>Respira a cada</small><select id="pulseSel"><option value="0">Desligado</option><option value="2">2 tempos</option><option value="4">4 tempos</option><option value="8">8 tempos</option></select></label>
+      </div>
+    </div>
+    <div class="panel sec">
+      <div class="sec-t">Camada 2</div>
+      <div class="knobs">
+        <input type="range" id="mix2" min="0" max="1" step="0.01" value="0.5" data-knob="Mistura">
+        <label class="selbox wide"><small>Segundo pad junto</small><select id="fam2Sel" aria-label="Camada 2 de pad"></select></label>
+        <output id="mix2O" hidden></output>
+      </div>
+    </div>
+    <output id="padFadeO" hidden></output><output id="padLoopO" hidden></output>
+    <output id="fxCutO" hidden></output><output id="fxPanO" hidden></output><output id="fxLowO" hidden></output><output id="fxHighO" hidden></output><output id="fxRevO" hidden></output><output id="fxThO" hidden></output><output id="fxRaO" hidden></output>
   </div>
-  <div id="keys" class="keys"></div>
-  <div class="status" id="status">
-    <small>Tom</small>
-    <div class="stkey" id="stKey">C</div>
-    <div class="stline" id="stPad"></div>
-    <div class="stline" id="stKit"></div>
-    <button id="stBtn" class="stop" data-action="pad:toggle" aria-label="Tocar ou parar o pad"></button>
-  </div>
-  <div class="row gap wrap live-extra">
-    <button data-action="key:-1" title="Descer 1 semitom">−½</button>
-    <button data-action="key:1" title="Subir 1 semitom">+½</button>
-    <button data-action="key:2" title="Subir 1 tom">+1</button>
-    <button data-action="pad:duck" class="toggle" title="Abaixar o pad para falar">Voz</button>
-    <button data-action="loop:toggle" class="toggle" title="Bateria em loop (liga o metrônomo)">Bat.</button>
-    <select id="fam2Sel" aria-label="Camada 2 de pad"></select>
-    <input type="range" id="mix2" min="0" max="1" step="0.01" value="0.5" aria-label="Mistura da camada 2"><output id="mix2O">—</output>
-  </div>
-  <div class="row gap wrap sliders">
-    <label>Volume <input type="range" id="padVol" min="0" max="1" step="0.01" value="0.8"></label>
-    <label>Troca de tom <output id="padFadeO">4 s</output><input type="range" id="padFade" min="0.5" max="12" step="0.5" value="4"></label>
-    <label>Emenda do loop <output id="padLoopO">5 s</output><input type="range" id="padLoop" min="2" max="10" step="0.5" value="5"></label>
-  </div>
-  <div class="row gap wrap sliders">
-    <label title="Respira no andamento do metrônomo">Pulso <select id="pulseSel"><option value="0">Desligado</option><option value="2">2 tempos</option><option value="4">4 tempos</option><option value="8">8 tempos</option></select></label>
-    <label>Intensidade <input type="range" id="pulseDepth" min="0.1" max="1" step="0.05" value="0.5"></label>
-    <label>Swell <select id="swellSel"><option value="0">Desligado</option><option value="1">1 compasso</option><option value="2">2 compassos</option><option value="4">4 compassos</option><option value="8">8 compassos</option></select></label>
-  </div>
-  <div id="famCats" class="chips"></div>
-  <div id="fams" class="fams"></div>
+  <button id="padToggle" data-action="pad:toggle" hidden></button>
 </section>
 
-<!-- DRUMS -->
+<!-- DRUMS (também usado no Palco) -->
 <section id="tab-drums" class="tab" data-sv="pads">
-  <div class="row between wrap gap">
-    <div class="stseg sv" role="tablist"><button class="on" data-sv="pads">Pads</button><button data-sv="vols">Volumes</button><button data-sv="kits">Kits</button></div>
-    <div class="row gap wrap">
-      <button id="drumEdit" class="toggle">✎ Editar pads</button>
-      <label class="mini">Volume <input type="range" id="drumVol" min="0" max="1" step="0.01" value="0.9"></label>
-    </div>
+  <div class="tabhead">
+    <div class="seg sv" role="tablist"><button class="on" data-sv="pads">Pads</button><button data-sv="vols">Mixer</button><button data-sv="kits">Meus kits</button></div>
+    <button id="drumEdit" class="hw toggle"><svg><use href="#i-edit"/></svg>Trocar sons</button>
   </div>
-  <div class="kitbar bar">
-    <span class="lbl">Drum Kit</span>
-    <button id="kitPrev" data-action="kit:prev" title="Kit anterior">◀</button>
-    <select id="kitSel" aria-label="Kit de bateria"></select>
-    <button id="kitNext" data-action="kit:next" title="Próximo kit">▶</button>
+  <div class="stepbar kitbar">
+    <button id="kitPrev" class="hw icon" data-action="kit:prev" aria-label="Kit anterior"><svg><use href="#i-prev"/></svg></button>
+    <div class="stepname"><small>Drum kit</small><select id="kitSel" aria-label="Kit de bateria"></select></div>
+    <button id="kitNext" class="hw icon" data-action="kit:next" aria-label="Próximo kit"><svg><use href="#i-next"/></svg></button>
   </div>
   <div id="drumGrid" class="drum-grid"></div>
-  <div id="dvols" class="card dvols"></div>
-  <div class="card">
-    <div class="row gap wrap">
-      <button id="setDel" class="danger">Excluir kit salvo</button>
-      <span class="sp"></span>
-      <input id="setName" placeholder="Nome do seu kit" maxlength="40">
-      <button id="setSave" class="primary">Salvar kit atual</button>
+  <div class="d-mix panel">
+    <div class="sec-t">Volume de cada peça</div>
+    <div id="dvols" class="dvols"></div>
+    <div class="dmaster"><input type="range" id="drumVol" min="0" max="1" step="0.01" value="0.9" data-knob="Bateria"></div>
+  </div>
+  <div class="d-kits">
+    <div class="panel sec">
+      <div class="sec-t">Salvar o kit atual</div>
+      <div class="row"><input id="setName" placeholder="Nome do seu kit" maxlength="40"><button id="setSave" class="hw amber"><svg><use href="#i-save"/></svg>Salvar</button></div>
+      <button id="setDel" class="hw danger"><svg><use href="#i-trash"/></svg>Excluir kit selecionado</button>
     </div>
-    <div class="row gap wrap" style="margin-top:8px">
-      <label class="filebtn">Importar samples <input type="file" id="sampleFiles" accept="audio/*" multiple hidden></label>
-      <button id="setExport">Exportar sets</button>
-      <label class="filebtn">Importar sets <input type="file" id="setImport" accept="application/json" hidden></label>
-      <small id="drumMsg"></small>
+    <div class="panel sec">
+      <div class="sec-t">Sons e arquivos</div>
+      <label class="hw filebtn">Importar samples de áudio<input type="file" id="sampleFiles" accept="audio/*" multiple hidden></label>
+      <div class="row"><button id="setExport" class="hw">Exportar kits</button><label class="hw filebtn">Importar kits<input type="file" id="setImport" accept="application/json" hidden></label></div>
+      <small id="drumMsg" class="muted">Para trocar o som de um pad, use "Trocar sons" e toque no pad.</small>
     </div>
   </div>
 </section>
 
-<!-- FX -->
+<!-- STAGELAB -->
 <section id="tab-fx" class="tab" data-sv="mix">
-  <div class="stseg" id="stSeg" role="tablist">
-    <button data-sv="mix" class="on" role="tab">Mixer</button>
-    <button data-sv="kb" role="tab">Teclado</button>
-    <button data-sv="fx" role="tab">FX dos pads</button>
-  </div>
-
-  <div class="stbar1">
-    <div class="tg"><small>Transpor</small><div class="oct"><button id="stTrDn" data-id="trans:-" aria-label="Transpor para baixo">−</button><b id="stTrV">0</b><button id="stTrUp" data-id="trans:+" aria-label="Transpor para cima">+</button></div></div>
-    <div class="bar setbar"><span class="lbl">Set</span>
-      <button id="stSetPrev" data-id="set:-" title="Set anterior" aria-label="Set anterior">◀</button>
-      <select id="stSet" aria-label="Set"></select>
-      <button id="stSetNext" data-id="set:+" title="Próximo set" aria-label="Próximo set">▶</button>
+  <div class="st-top">
+    <div class="stepbar setbar">
+      <button id="stSetPrev" class="hw icon" data-id="set:-" aria-label="Set anterior"><svg><use href="#i-prev"/></svg></button>
+      <div class="stepname"><small>Set</small><select id="stSet" aria-label="Set"></select></div>
+      <button id="stSetNext" class="hw icon" data-id="set:+" aria-label="Próximo set"><svg><use href="#i-next"/></svg></button>
     </div>
-    <div class="tg"><small>Oitava</small><div class="oct"><button id="stOcDn" data-id="oct:-" aria-label="Oitava abaixo">−</button><b id="stOcV">0</b><button id="stOcUp" data-id="oct:+" aria-label="Oitava acima">+</button></div></div>
+    <div class="stepper"><small>Transpor</small><div><button id="stTrDn" class="hw icon" data-id="trans:-" aria-label="Transpor para baixo"><svg><use href="#i-minus"/></svg></button><b id="stTrV">0</b><button id="stTrUp" class="hw icon" data-id="trans:+" aria-label="Transpor para cima"><svg><use href="#i-plus"/></svg></button></div></div>
+    <div class="stepper"><small>Oitava</small><div><button id="stOcDn" class="hw icon" data-id="oct:-" aria-label="Oitava abaixo"><svg><use href="#i-minus"/></svg></button><b id="stOcV">0</b><button id="stOcUp" class="hw icon" data-id="oct:+" aria-label="Oitava acima"><svg><use href="#i-plus"/></svg></button></div></div>
+    <div class="st-act">
+      <button id="stSave" class="hw" data-id="save" title="Salvar alterações neste set"><svg><use href="#i-save"/></svg><span>Salvar</span></button>
+      <button id="stOver" class="hw" data-id="over" title="Salvar como um set novo"><svg><use href="#i-plus"/></svg><span>Novo set</span></button>
+      <button id="stDel" class="hw danger" title="Excluir este set"><svg><use href="#i-trash"/></svg><span>Excluir</span></button>
+      <button id="stKbBtn" class="hw toggle" title="Mostrar teclado"><svg><use href="#i-keys"/></svg><span>Teclado</span></button>
+      <button id="stLearn" class="hw toggle" title="Vincular controles ao seu controlador MIDI"><svg><use href="#i-link"/></svg><span>MIDI</span></button>
+    </div>
   </div>
-  <div class="stbar2">
-    <button id="stSave" data-id="save" class="mixonly">Salvar</button>
-    <button id="stOver" data-id="over" class="mixonly">Sobrescrever</button>
-    <button id="stDel" class="mixonly danger">Excluir</button>
-    <span class="sp"></span>
-    <button id="stSus" data-id="sus" class="toggle">Sustain</button>
-    <button id="stLearn" class="toggle">Vincular MIDI</button>
-    <button id="stUnmap" class="mixonly">Limpar vínculos</button>
+  <div class="learnbar" id="stLearnBar" hidden>
+    <span id="stLearnMsg">Toque num fader, knob ou botão e depois mexa no controlador.</span>
+    <button id="stUnmap" class="hw">Apagar vínculos</button>
+    <button id="stLearnDone" class="hw amber">Concluir</button>
   </div>
 
-  <div id="stMix" class="stview"><div id="stMixer" class="mixer"></div></div>
+  <div id="stMix" class="stview">
+    <div class="st-sec fxsec"><div class="sec-t">Efeitos <em>valem para todos os instrumentos</em></div><div id="stFxRow" class="fxrow"></div></div>
+    <div class="st-sec insec"><div class="sec-t">Instrumentos <em>suba o fader para somar ao som; toque no nome para silenciar</em></div><div id="stMixer" class="mixer"></div></div>
+  </div>
 
-  <div id="stKb" class="stview" hidden>
+  <div id="stKb" class="stview">
     <div class="board">
       <div class="wheels">
         <div class="whc"><div class="wh" id="whPitch"><div class="roll"></div><div class="notch"></div></div><small>Pitch</small></div>
         <div class="whc"><div class="wh" id="whMod"><div class="roll"></div><div class="notch"></div></div><small>Mod</small></div>
+        <button id="stSus" data-id="sus" class="hw toggle sus">Sustain</button>
       </div>
       <div id="stKeys" class="stkeys"></div>
-    </div>
-  </div>
-
-  <div id="stFx" class="stview" hidden>
-    <div class="card fxgrid">
-      <label>Cutoff <output id="fxCutO"></output><input type="range" id="fxCut" min="0" max="1" step="0.001" value="1"></label>
-      <label>Pan <output id="fxPanO"></output><input type="range" id="fxPan" min="-1" max="1" step="0.01" value="0"></label>
-      <label>Graves <output id="fxLowO"></output><input type="range" id="fxLow" min="-12" max="12" step="0.5" value="0"></label>
-      <label>Agudos <output id="fxHighO"></output><input type="range" id="fxHigh" min="-12" max="12" step="0.5" value="0"></label>
-      <label>Reverb <output id="fxRevO"></output><input type="range" id="fxRev" min="0" max="1" step="0.01" value="0.25"></label>
-    </div>
-    <div class="card">
-      <h3>Compressor dos pads</h3>
-      <div class="row gap wrap">
-        <button id="fxComp" class="toggle">Compressor</button>
-        <label>Threshold <output id="fxThO"></output><input type="range" id="fxTh" min="-50" max="0" step="1" value="-24"></label>
-        <label>Ratio <output id="fxRaO"></output><input type="range" id="fxRa" min="1.5" max="12" step="0.5" value="4"></label>
-        <button id="fxReset">Zerar efeitos</button>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Uso offline</h3>
-      <p class="muted">Baixa todos os sons para o aparelho, para tocar sem internet (uns 170 MB).</p>
-      <div class="row gap"><button id="btnOffline">Baixar tudo para offline</button><progress id="offProg" value="0" max="1" hidden></progress><small id="offMsg"></small></div>
     </div>
   </div>
 </section>
 
 <!-- METRONOMO -->
 <section id="tab-metro" class="tab">
-  <div class="row between"><h2>Metrônomo</h2>
-    <button id="metToggle" data-action="met:toggle" class="primary">▶ Iniciar</button></div>
-  <div class="bpm-box">
-    <button id="bpmMinus" class="round">−</button>
-    <div class="bpm"><input id="bpm" type="number" min="30" max="260" value="72"><small>BPM</small></div>
-    <button id="bpmPlus" class="round">+</button>
-    <button id="tap" data-action="met:tap" class="tap">TAP</button>
+  <div class="m-main panel">
+    <div class="bpm-box">
+      <button id="bpmMinus" class="hw icon round" aria-label="Diminuir BPM"><svg><use href="#i-minus"/></svg></button>
+      <div class="bpm lcd"><input id="bpm" type="number" min="30" max="260" value="72" aria-label="BPM"><small>BPM</small></div>
+      <button id="bpmPlus" class="hw icon round" aria-label="Aumentar BPM"><svg><use href="#i-plus"/></svg></button>
+    </div>
+    <input type="range" id="bpmRange" min="30" max="260" step="1" value="72" class="wide" aria-label="Andamento">
+    <div id="beats" class="beats"></div>
+    <div class="m-btns">
+      <button id="tap" data-action="met:tap" class="hw tap">Tap</button>
+      <button id="metToggle" data-action="met:toggle" class="playbtn wide"><svg><use href="#i-play"/></svg><span>Iniciar</span></button>
+    </div>
   </div>
-  <input type="range" id="bpmRange" min="30" max="260" step="1" value="72" class="wide">
-  <div id="beats" class="beats"></div>
-  <div class="card fxgrid">
-    <label>Compasso
-      <select id="metSig"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="6">6/8</option></select></label>
-    <label>Som <select id="metSound"></select></label>
-    <label>Volume <input type="range" id="metVol" min="0" max="1" step="0.01" value="0.7"></label>
-    <label class="check"><input type="checkbox" id="metAccent" checked> Acento no 1</label>
-    <label>Bateria em loop <select id="loopSel"></select></label>
-    <label>Volume da bateria <input type="range" id="loopVol" min="0" max="1" step="0.01" value="0.8"></label>
+  <div class="m-side">
+    <div class="panel sec">
+      <div class="sec-t">Click</div>
+      <div class="knobs">
+        <label class="selbox"><small>Compasso</small><select id="metSig"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="6">6/8</option></select></label>
+        <label class="selbox"><small>Som</small><select id="metSound"></select></label>
+        <input type="range" id="metVol" min="0" max="1" step="0.01" value="0.7" data-knob="Volume">
+        <label class="check"><input type="checkbox" id="metAccent" checked><span>Acento no 1</span></label>
+      </div>
+    </div>
+    <div class="panel sec">
+      <div class="sec-t">Bateria em loop</div>
+      <div class="knobs">
+        <label class="selbox wide"><small>Ritmo</small><select id="loopSel"></select></label>
+        <input type="range" id="loopVol" min="0" max="1" step="0.01" value="0.8" data-knob="Volume">
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- SETLIST -->
 <section id="tab-setlist" class="tab">
-  <div class="row between wrap gap"><div class="row gap listbar"><select id="listSel" aria-label="Setlist"></select><button id="listNew" title="Nova setlist">＋</button><button id="listRen" title="Renomear setlist">✎</button><button id="listDel" class="danger" title="Excluir setlist">✕</button></div>
-    <div class="row gap wrap">
-      <button data-action="song:prev">◀ Anterior</button>
-      <button data-action="song:next">Próxima ▶</button>
-    </div></div>
-  <div class="card">
-    <div class="row gap wrap">
-      <input id="songTitle" placeholder="Título da música" maxlength="60" class="grow">
-      <button id="songAdd" class="primary">+ Salvar estado atual</button>
+  <div class="tabhead">
+    <div class="stepbar listbar">
+      <div class="stepname"><small>Setlist</small><select id="listSel" aria-label="Setlist"></select></div>
+      <button id="listNew" class="hw icon" title="Nova setlist" aria-label="Nova setlist"><svg><use href="#i-plus"/></svg></button>
+      <button id="listRen" class="hw icon" title="Renomear setlist" aria-label="Renomear setlist"><svg><use href="#i-edit"/></svg></button>
+      <button id="listDel" class="hw icon danger" title="Excluir setlist" aria-label="Excluir setlist"><svg><use href="#i-trash"/></svg></button>
     </div>
-    <small class="muted">Guarda o tom, a família de pad e o andamento que estão ativos agora.</small>
+    <div class="row navsong">
+      <button class="hw" data-action="song:prev"><svg><use href="#i-prev"/></svg>Anterior</button>
+      <button class="hw" data-action="song:next">Próxima<svg><use href="#i-next"/></svg></button>
+    </div>
+  </div>
+  <div class="addsong">
+    <input id="songTitle" placeholder="Título da música" maxlength="60">
+    <button id="songAdd" class="hw amber" title="Guarda tom, pad, andamento, kit, efeitos e loop atuais"><svg><use href="#i-plus"/></svg>Salvar estado atual</button>
   </div>
   <ol id="songs" class="songs"></ol>
-  <div class="row gap wrap">
-    <button id="slExport">Exportar setlist</button>
-    <button id="bkExport">Backup completo</button>
-    <label class="filebtn">Restaurar backup <input type="file" id="bkImport" accept="application/json" hidden></label>
-    <label class="filebtn">Importar setlist <input type="file" id="slImport" accept="application/json" hidden></label>
+  <div class="row files">
+    <button id="slExport" class="hw">Exportar setlist</button>
+    <label class="hw filebtn">Importar setlist<input type="file" id="slImport" accept="application/json" hidden></label>
+    <button id="bkExport" class="hw">Backup completo</button>
+    <label class="hw filebtn">Restaurar backup<input type="file" id="bkImport" accept="application/json" hidden></label>
   </div>
 </section>
 
 <!-- MIDI -->
 <section id="tab-midi" class="tab" data-sv="ctl">
-  <div class="row between">
-    <div class="stseg sv" role="tablist"><button class="on" data-sv="ctl">Controlador</button><button data-sv="map">Mapa</button></div>
+  <div class="tabhead">
+    <div class="seg sv" role="tablist"><button class="on" data-sv="ctl">Controlador</button><button data-sv="map">Mapa</button></div>
   </div>
-  <div class="card" data-v="ctl">
-    <div id="midiStatus">Verificando MIDI…</div>
-    <small class="muted">Funciona com controladores USB e Bluetooth MIDI quando o navegador oferece Web MIDI (Chrome/Edge no computador e no Android). O Safari do iPad não oferece Web MIDI.</small>
+  <div class="panel sec" data-v="ctl">
+    <div class="sec-t">Conexão</div>
+    <div id="midiStatus" class="lcdline">Verificando MIDI…</div>
+    <small id="midiLast" class="lcdline dim">Última mensagem: nenhuma ainda</small>
+    <small class="muted">Funciona com controladores USB e Bluetooth no Chrome e no Edge (computador e Android). O Safari do iPad não oferece Web MIDI.</small>
   </div>
-  <div class="card" data-v="ctl">
-    <div class="row gap wrap">
-      <button id="midiLearn" class="toggle">Mapear controles</button>
-      <button id="midiReset">Restaurar padrão</button>
-      <small id="midiLast" class="muted">Última mensagem: nenhuma ainda</small>
-      <small id="midiHint" class="muted">Ative, toque num botão do app e depois numa tecla/pad do controlador.</small>
-    </div>
-    <p class="muted" style="margin:10px 0 0">Padrão: notas 36–51 tocam os 16 drum pads; notas 60–71 trocam o tom do pad (C a B).</p>
+  <div class="panel sec" data-v="ctl">
+    <div class="sec-t">Mapear</div>
+    <div class="row"><button id="midiLearn" class="hw toggle"><svg><use href="#i-link"/></svg>Mapear controles</button><button id="midiReset" class="hw">Restaurar padrão</button></div>
+    <small id="midiHint" class="muted">Ative, toque num botão do app e depois numa tecla ou pad do controlador.</small>
+    <small class="muted">Padrão: notas 36 a 51 tocam os drum pads; notas 60 a 71 trocam o tom do pad (C a B); Program Change N carrega a música N+1.</small>
   </div>
-  <div class="card" data-v="map"><div id="midiMap" class="midimap"></div></div>
+  <div class="panel" data-v="map"><div id="midiMap" class="midimap"></div></div>
 </section>
 
 </main>
 
 <div id="modal" class="overlay hidden">
-  <div class="modal-card">
-    <div class="row between"><h3 id="modalTitle">Escolher som</h3><button id="modalClose">Fechar</button></div>
-    <div id="modalCats" class="chips"></div>
+  <div class="modal-card panel">
+    <div class="row between"><h3 id="modalTitle">Escolher som</h3><button id="modalClose" class="hw">Fechar</button></div>
+    <div id="modalCats" class="seg chips"></div>
     <div id="modalList" class="list"></div>
   </div>
 </div>
 
 <div id="notesBox" class="overlay hidden">
-  <div class="modal-card">
-    <div class="row between"><h3 id="notesTitle">Notas</h3><button id="notesClose">Fechar</button></div>
+  <div class="modal-card panel">
+    <div class="row between"><h3 id="notesTitle">Notas</h3><button id="notesClose" class="hw">Fechar</button></div>
     <pre id="notesText" class="notes"></pre>
   </div>
 </div>
-<div id="lockLayer" class="hidden"><button id="lockHold">Segure para destravar</button></div>
+<div id="lockLayer" class="hidden"><button id="lockHold" class="hw">Segure para destravar</button></div>
 <div id="toast"></div>
 <script src="app.js"></script>
+<script src="knob.js"></script>
 <script src="stagelab.js"></script>
 <script src="pager.js"></script>
 </body>

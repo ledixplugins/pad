@@ -289,7 +289,7 @@
   function drawKnob(id) {
     var f = fxOf(st().cur, id), k = UI.knob[id];
     k.style.setProperty('--a', (-135 + f.v * 270) + 'deg'); k.setAttribute('aria-valuenow', Math.round(f.v * 100));
-    k.parentNode.classList.toggle('off', !f.on); UI.pow[id].classList.toggle('on', f.on);
+    k.parentNode.classList.toggle('off', !f.on); UI.pow[id].classList.toggle('on', f.on); UI.pow[id].textContent = f.on ? 'On' : 'Off';
   }
   function setFader(i, v) { st().cur.f[i] = clamp(v, 0, 1); drawFader(i); applyFaders(); persist(); }
   function toggleMute(i) { st().cur.m[i] = st().cur.m[i] ? 0 : 1; drawFader(i); applyFaders(); persist(); }
@@ -304,37 +304,40 @@
     CH.forEach(function (c, i) { if (UI.name[i]) UI.name[i].classList.toggle('loading', !!c.sf && !(bank[c.id] && bank[c.id].st === 'ready')); });
   }
   function buildMixer() {
-    var box = $('#stMixer'); box.innerHTML = '';
-    CH.forEach(function (c, i) {
-      var fx = FXD[i], col = el('div', 'mcol');
+    var box = $('#stMixer'), fxr = $('#stFxRow'); box.innerHTML = ''; fxr.innerHTML = '';
+    FXD.forEach(function (fx) {
       var kw = el('div', 'kw');
-      var knob = el('div', 'knob'); knob.dataset.id = 'knob:' + fx.id; knob.setAttribute('role', 'slider'); knob.setAttribute('aria-label', fx.name); knob.setAttribute('aria-valuemin', 0); knob.setAttribute('aria-valuemax', 100); knob.tabIndex = 0;
-      knob.appendChild(el('i'));
-      var lab = el('small', null, fx.name);
-      var pow = el('button', 'pow'); pow.dataset.id = 'pow:' + fx.id; pow.setAttribute('aria-label', fx.name + ' ligar ou desligar');
-      pow.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/></svg>';
-      kw.appendChild(knob); kw.appendChild(lab);
-      var fd = el('div', 'fader'); fd.dataset.id = 'fader:' + i; fd.setAttribute('role', 'slider'); fd.setAttribute('aria-label', 'Volume ' + c.name); fd.setAttribute('aria-valuemin', 0); fd.setAttribute('aria-valuemax', 100); fd.tabIndex = 0;
+      var knob = el('div', 'knob'); knob.dataset.id = 'knob:' + fx.id; knob.setAttribute('role', 'slider'); knob.setAttribute('aria-label', fx.name); knob.tabIndex = 0;
+      knob.innerHTML = '<i class="cap"><i class="ind"></i></i>';
+      var pow = el('button', 'pow'); pow.dataset.id = 'pow:' + fx.id; pow.setAttribute('aria-label', fx.name + ': ligar ou desligar'); pow.title = 'Ligar/desligar ' + fx.name;
+      kw.appendChild(knob); kw.appendChild(el('small', null, fx.name)); kw.appendChild(pow);
+      fxr.appendChild(kw);
+      UI.knob[fx.id] = knob; UI.pow[fx.id] = pow;
+      var y0 = 0, v0 = 0, kOn = false;
+      knob.addEventListener('pointerdown', function (e) { kOn = true; y0 = e.clientY; v0 = fxOf(st().cur, fx.id).v; knob.setPointerCapture(e.pointerId); e.preventDefault(); });
+      knob.addEventListener('pointermove', function (e) { if (kOn) setKnob(fx.id, v0 + (y0 - e.clientY) / 180); });
+      knob.addEventListener('pointerup', function () { kOn = false; }); knob.addEventListener('pointercancel', function () { kOn = false; });
+      knob.addEventListener('dblclick', function () { setKnob(fx.id, fx.v); });
+      knob.addEventListener('keydown', function (e) { var d = (e.key === 'ArrowUp' || e.key === 'ArrowRight') ? 0.05 : (e.key === 'ArrowDown' || e.key === 'ArrowLeft') ? -0.05 : 0; if (d) { e.preventDefault(); setKnob(fx.id, fxOf(st().cur, fx.id).v + d); } });
+      pow.onclick = function () { togglePow(fx.id); };
+    });
+    CH.forEach(function (c, i) {
+      var col = el('div', 'mcol');
+      var fd = el('div', 'fader'); fd.dataset.id = 'fader:' + i; fd.setAttribute('role', 'slider'); fd.setAttribute('aria-label', 'Volume ' + c.name); fd.tabIndex = 0;
       var track = el('div', 'trk'); track.appendChild(el('div', 'fill')); fd.appendChild(track); fd.appendChild(el('div', 'thumb'));
       var meter = el('div', 'meter'); meter.appendChild(el('i'));
       var wrap = el('div', 'fw'); wrap.appendChild(fd); wrap.appendChild(meter);
-      var nm = el('button', 'cname', c.name); nm.dataset.id = 'mute:' + i;
-      col.appendChild(kw); col.appendChild(pow); col.appendChild(wrap); col.appendChild(nm);
+      var nm = el('button', 'cname'); nm.dataset.id = 'mute:' + i; nm.title = 'Silenciar/ativar ' + c.name;
+      nm.appendChild(el('i', 'led')); nm.appendChild(el('span', null, c.name));
+      col.appendChild(wrap); col.appendChild(nm);
       box.appendChild(col);
-      UI.fader[i] = fd; UI.name[i] = nm; UI.meter[i] = meter; UI.knob[fx.id] = knob; UI.pow[fx.id] = pow;
+      UI.fader[i] = fd; UI.name[i] = nm; UI.meter[i] = meter;
       var fdOn = false;
       function fy(e) { var r = track.getBoundingClientRect(); setFader(i, 1 - (e.clientY - r.top) / r.height); }
       fd.addEventListener('pointerdown', function (e) { fdOn = true; fd.setPointerCapture(e.pointerId); fy(e); e.preventDefault(); });
       fd.addEventListener('pointermove', function (e) { if (fdOn) fy(e); });
       fd.addEventListener('pointerup', function () { fdOn = false; }); fd.addEventListener('pointercancel', function () { fdOn = false; });
       fd.addEventListener('keydown', function (e) { var d = (e.key === 'ArrowUp' || e.key === 'ArrowRight') ? 0.05 : (e.key === 'ArrowDown' || e.key === 'ArrowLeft') ? -0.05 : 0; if (d) { e.preventDefault(); setFader(i, st().cur.f[i] + d); } });
-      var y0 = 0, v0 = 0, kOn = false;
-      knob.addEventListener('pointerdown', function (e) { kOn = true; y0 = e.clientY; v0 = fxOf(st().cur, fx.id).v; knob.setPointerCapture(e.pointerId); e.preventDefault(); });
-      knob.addEventListener('pointermove', function (e) { if (kOn) setKnob(fx.id, v0 + (y0 - e.clientY) / 160); });
-      knob.addEventListener('pointerup', function () { kOn = false; }); knob.addEventListener('pointercancel', function () { kOn = false; });
-      knob.addEventListener('dblclick', function () { setKnob(fx.id, fx.v); });
-      knob.addEventListener('keydown', function (e) { var d = (e.key === 'ArrowUp' || e.key === 'ArrowRight') ? 0.05 : (e.key === 'ArrowDown' || e.key === 'ArrowLeft') ? -0.05 : 0; if (d) { e.preventDefault(); setKnob(fx.id, fxOf(st().cur, fx.id).v + d); } });
-      pow.onclick = function () { togglePow(fx.id); };
       nm.onclick = function () { toggleMute(i); };
     });
   }
@@ -345,7 +348,9 @@
     var sel = $('#stSet'); sel.innerHTML = '';
     setNames().forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
     sel.value = st().set;
-    $('#stDel').disabled = !st().sets[st().set];
+    var mine = !!st().sets[st().set];
+    $('#stDel').hidden = !mine;
+    $('#stSave').title = mine ? 'Salvar alterações em "' + st().set + '"' : 'Set de fábrica: salvar como um set seu';
     paintMapped(); paintLoading();
   }
 
@@ -383,7 +388,7 @@
     if (a === 'knob') return 'Knob ' + FXNAME[b];
     if (a === 'pow') return FXNAME[b] + ' liga/desliga';
     if (a === 'mute') return CH[+b].name + ' liga/desliga';
-    return { 'trans:-': 'Transpor −', 'trans:+': 'Transpor +', 'oct:-': 'Oitava −', 'oct:+': 'Oitava +', 'set:-': 'Set anterior', 'set:+': 'Próximo set', save: 'Salvar set', over: 'Sobrescrever set', sus: 'Sustain' }[id] || id;
+    return { 'trans:-': 'Transpor −', 'trans:+': 'Transpor +', 'oct:-': 'Oitava −', 'oct:+': 'Oitava +', 'set:-': 'Set anterior', 'set:+': 'Próximo set', save: 'Salvar set', over: 'Novo set', sus: 'Sustain' }[id] || id;
   }
   function isCont(id) { return id.indexOf('fader:') === 0 || id.indexOf('knob:') === 0; }
   function act(id, val) {
@@ -396,7 +401,7 @@
     else if (id === 'trans:+') setTrans(1); else if (id === 'trans:-') setTrans(-1);
     else if (id === 'oct:+') setOct(1); else if (id === 'oct:-') setOct(-1);
     else if (id === 'set:+') stepSet(1); else if (id === 'set:-') stepSet(-1);
-    else if (id === 'save') saveNew(); else if (id === 'over') overwrite();
+    else if (id === 'save') overwrite(); else if (id === 'over') saveNew();
     else if (id === 'sus') setSustain(!sustain);
   }
   function setTrans(d) { allOff(); st().cur.tr = clamp(st().cur.tr + d, -12, 12); drawAll(); persist(); }
@@ -416,32 +421,33 @@
   function bindMap(key, id) {
     Object.keys(st().map).forEach(function (k) { if (st().map[k] === id || k === key) delete st().map[k]; });
     st().map[key] = id; persist(); paintMapped();
-    toast(idName(id) + ' ← ' + key.replace('cc:', 'CC ').replace('note:', 'Nota '));
+    $('#stLearnMsg').textContent = idName(id) + ' vinculado a ' + key.replace('cc:', 'CC ').replace('note:', 'nota ') + '. Toque no próximo controle ou em Concluir.';
     armed = null; $$('#tab-fx .armed').forEach(function (e) { e.classList.remove('armed'); });
   }
   function setLearn(on) {
     learn = on; armed = null; $('#stLearn').classList.toggle('on', on); $('#tab-fx').classList.toggle('learning', on);
+    $('#stLearnBar').hidden = !on; $('#stLearnMsg').textContent = 'Toque num fader, knob ou botão e depois mexa no controlador.';
     $$('#tab-fx .armed').forEach(function (e) { e.classList.remove('armed'); });
-    if (on) toast('Toque num controle e mexa no controlador');
   }
   function bindLearn() {
     $('#stLearn').onclick = function () { setLearn(!learn); };
-    $('#stUnmap').onclick = function () { st().map = {}; persist(); paintMapped(); toast('Vínculos MIDI removidos'); };
+    $('#stUnmap').onclick = function () { if (!Object.keys(st().map).length || confirm('Apagar todos os vínculos MIDI do StageLab?')) { st().map = {}; persist(); paintMapped(); toast('Vínculos MIDI apagados'); } };
+    $('#stLearnDone').onclick = function () { setLearn(false); };
     var t = $('#tab-fx');
     function cap(e) {
       if (!learn) return;
-      var x = e.target.closest && e.target.closest('[data-id]'); if (!x) return;
+      var x = e.target.closest && e.target.closest('[data-id]'); if (!x || x.closest('#stLearnBar')) return;
       e.preventDefault(); e.stopPropagation();
       if (e.type === 'pointerdown') {
         $$('#tab-fx .armed').forEach(function (z) { z.classList.remove('armed'); });
-        armed = x.dataset.id; x.classList.add('armed'); toast(idName(armed) + ': mexa no controlador');
+        armed = x.dataset.id; x.classList.add('armed'); $('#stLearnMsg').textContent = idName(armed) + ': agora mexa no controlador.';
       }
     }
     ['pointerdown', 'click', 'dblclick'].forEach(function (ev) { t.addEventListener(ev, cap, true); });
   }
 
   /* ---------- MIDI ---------- */
-  function visible() { var t = $('#tab-fx'); return !!(t && t.classList.contains('on') && t.dataset.sv !== 'fx'); }
+  function visible() { var t = $('#tab-fx'); return !!(t && t.classList.contains('on')); }
   function midi(e) {
     if (!visible()) return false;
     var d = e.data, s = d[0] & 0xf0, a = d[1], b = d[2];
@@ -467,21 +473,23 @@
   }
 
   /* ---------- abas e inicialização ---------- */
-  function setView(v) {
-    $('#tab-fx').dataset.sv = v;
-    $$('#stSeg button').forEach(function (x) { x.classList.toggle('on', x.dataset.sv === v); });
-    $('#stMix').hidden = v !== 'mix'; $('#stKb').hidden = v !== 'kb'; $('#stFx').hidden = v !== 'fx';
-    if (v === 'fx') { allOff(); if (learn) setLearn(false); }
+  function setKb(on) {
+    var t = $('#tab-fx'); t.dataset.kb = on ? '1' : ''; $('#stKbBtn').classList.toggle('on', on);
+    try { localStorage.setItem('aurapad.stkb', on ? '1' : ''); } catch (e) {}
+    if (!on) allOff();
+    var c = wantCount(); if (c !== count || !KEYS.length) buildKeys();
   }
   function init() {
     if (!$('#stMixer')) return;
     st(); buildMixer(); buildKeys(); bindKeys(); bindLearn();
-    $$('#stSeg button').forEach(function (b) { b.onclick = function () { setView(b.dataset.sv); }; });
+    $('#stKbBtn').onclick = function () { setKb($('#tab-fx').dataset.kb !== '1'); };
+    var kb0 = null; try { kb0 = localStorage.getItem('aurapad.stkb'); } catch (e) {}
+    setKb(kb0 === null ? (window.innerHeight >= 700 && window.innerWidth > 600) : kb0 === '1');
     $('#stTrDn').onclick = function () { setTrans(-1); }; $('#stTrUp').onclick = function () { setTrans(1); };
     $('#stOcDn').onclick = function () { setOct(-1); }; $('#stOcUp').onclick = function () { setOct(1); };
     $('#stSetPrev').onclick = function () { stepSet(-1); }; $('#stSetNext').onclick = function () { stepSet(1); };
     $('#stSet').onchange = function () { loadSet($('#stSet').value); };
-    $('#stSave').onclick = saveNew; $('#stOver').onclick = overwrite; $('#stDel').onclick = delSet;
+    $('#stSave').onclick = overwrite; $('#stOver').onclick = saveNew; $('#stDel').onclick = delSet;
     $('#stSus').onclick = function () { setSustain(!sustain); };
     wheel($('#whPitch'), function (y, rc) { setBend(((rc.top + rc.height / 2) - y) / (rc.height * 0.4)); }, function () { setBend(0, true); });
     wheel($('#whMod'), function (y, rc) { setMod((rc.bottom - rc.height * 0.1 - y) / (rc.height * 0.8)); });

@@ -46,6 +46,6 @@
     queue();
     cont._pager = { queue: queue, reset: function () { page = 0; queue(); } };
   }
-  function init() { ['#fams', '#songs', '#midiMap', '#dvols', '#modalList'].forEach(function (s) { var c = document.querySelector(s); if (c) Pager(c); }); }
+  function init() { ['#songs', '#midiMap', '#modalList'].forEach(function (s) { var c = document.querySelector(s); if (c) Pager(c); }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

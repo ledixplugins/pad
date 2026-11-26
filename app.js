@@ -233,7 +233,7 @@ function keyShift(d) {
   if (padOn) padStart(); renderKeys(); toast('Tom: ' + LABEL[S.key]);
 }
 function duckToggle() { duckOn = !duckOn; $$('[data-action="pad:duck"]').forEach(function (b) { b.classList.toggle('on', duckOn); }); applyAll(); }
-function setLayer2(id) { S.family2 = id || ''; save(); renderLayer(); applyAll(); if (padOn) padStart(); }
+function setLayer2(id) { S.family2 = id || ''; save(); renderLayer(); renderFams(); applyAll(); if (padOn) padStart(); }
 function renderLayer() {
   var s = $('#fam2Sel'); if (!s) return;
   if (s.options.length < 2) { var o0 = el('option', null, 'Sem camada 2'); o0.value = ''; s.appendChild(o0); famList().forEach(function (f) { var o = el('option', null, f.name); o.value = f.id; s.appendChild(o); }); }
@@ -264,16 +264,27 @@ function renderKeys() {
   });
   renderStatus();
 }
-function renderPadBtn() {
-  var b = $('#padToggle'); b.textContent = padOn ? '■ Parar' : '▶ Tocar'; b.classList.toggle('on', padOn);
-  renderStatus();
-}
+function renderPadBtn() { renderStatus(); }
+function svgUse(id) { return '<svg><use href="#' + id + '"/></svg>'; }
+var lastPlayIcon = null;
 function renderStatus() {
   var k = $('#stKey'); if (!k) return;
-  k.textContent = LABEL[padOn && padNote ? padNote : S.key] || '';
-  $('#stPad').textContent = 'Pad: ' + (FAM[S.family] ? FAM[S.family].name : '—');
-  $('#stKit').textContent = 'Drum Kit: ' + (S.kitSel ? S.kitSel.slice(2) : 'Personalizado');
-  var b = $('#stBtn'); b.textContent = padOn ? '■' : '▶'; b.classList.toggle('playing', padOn);
+  var key = LABEL[padOn && padNote ? padNote : S.key] || '', fam = FAM[S.family] ? FAM[S.family].name : '—';
+  k.textContent = key;
+  $('#stPad').textContent = fam + (FAM[S.family2] ? ' + ' + FAM[S.family2].name : '');
+  var b = $('#stBtn'), ic = padOn ? 'i-stop' : 'i-play';
+  if (lastPlayIcon !== ic) { b.innerHTML = svgUse(ic); lastPlayIcon = ic; }
+  b.classList.toggle('playing', padOn);
+  $('#status').classList.toggle('playing', padOn);
+  renderOled();
+}
+function renderOled() {
+  var m = $('#oledMain'); if (!m || !CAT) return;
+  var key = LABEL[padOn && padNote ? padNote : S.key] || '', fam = FAM[S.family] ? FAM[S.family].name : '';
+  m.textContent = 'TOM ' + key + ' · ' + fam.toUpperCase();
+  var s = S.setlist[S.songIdx];
+  $('#oledSub').textContent = (s ? (S.songIdx + 1) + '. ' + s.title + ' · ' : '') + S.bpm + ' BPM' + (padOn ? ' · tocando' : padLoadingNote ? ' · carregando…' : '');
+  $('#oledLed').className = 'led' + (padOn ? ' on' : padLoadingNote ? ' wait' : '');
 }
 function famList() { return CAT.pads.slice().sort(byName); }
 function famStep(d) {
@@ -293,6 +304,7 @@ function renderFams() {
   cats.sort(byName);
   if (!famCat) famCat = FAM[S.family] ? FAM[S.family].category : cats[0];
   var cb = $('#famCats'); cb.innerHTML = '';
+  if (famCat !== 'Todos' && cats.indexOf(famCat) < 0) famCat = 'Todos';
   ['Todos'].concat(cats).forEach(function (c) {
     var b = el('button', (famCat === c || (famCat === 'Todos' && c === 'Todos')) ? 'on' : '', c);
     b.onclick = function () { famCat = c; renderFams(); };
@@ -300,31 +312,76 @@ function renderFams() {
   });
   var fb = $('#fams'); fb.innerHTML = '';
   CAT.pads.filter(function (f) { return famCat === 'Todos' || f.category === famCat; }).sort(byName).forEach(function (f) {
-    var b = el('button', 'fam' + (f.id === S.family ? ' on' : ''), f.name);
-    b.appendChild(el('small', null, f.category));
+    var b = el('button', 'fam' + (f.id === S.family ? ' on' : '') + (f.id === S.family2 ? ' l2' : ''));
+    b.appendChild(el('span', 'nm', f.name)); b.appendChild(el('small', null, f.category));
     b.onclick = function () { setFamily(f.id); };
     fb.appendChild(b);
   });
+  fitGrid(fb, 128, 40);
+}
+/* grade que sempre cabe: escolhe colunas e linhas para o espaço disponível (nada rola) */
+function fitGrid(box, minW, minH, wide) {
+  if (!box) return;
+  var n = box.children.length, w = box.clientWidth, h = box.clientHeight, gap = 6;
+  if (!n || !w || !h) { box._fit = [minW, minH, wide]; return; }
+  var best = null;
+  if (wide) {  // o maior número de colunas que ainda deixa cada célula com o tamanho mínimo
+    for (var cc = n; cc >= 1; cc--) {
+      var rr = Math.ceil(n / cc), cw0 = (w - gap * (cc - 1)) / cc, ch0 = (h - gap * (rr - 1)) / rr;
+      if (cw0 >= minW && ch0 >= minH) { best = { c: cc, r: rr }; break; }
+    }
+  }
+  if (!best) for (var c = 1; c <= n; c++) {
+    var r = Math.ceil(n / c), cw = (w - gap * (c - 1)) / c, ch = (h - gap * (r - 1)) / r;
+    if (cw < minW && c > 1) break;
+    best = { c: c, r: r }; if (ch >= minH) break;
+  }
+  box.style.gridTemplateColumns = 'repeat(' + best.c + ',minmax(0,1fr))';
+  box.style.gridTemplateRows = 'repeat(' + best.r + ',minmax(0,1fr))';
+  box._fit = [minW, minH, wide];
+}
+if (window.ResizeObserver) {
+  var fitRO = new ResizeObserver(function (es) { es.forEach(function (e) { var b = e.target; if (b._fit) fitGrid(b, b._fit[0], b._fit[1], b._fit[2]); }); });
+  window.addEventListener('DOMContentLoaded', function () { ['#fams', '#dvols'].forEach(function (s) { var b = $(s); if (b) fitRO.observe(b); }); });
 }
 
 /* ---------- drum pads ---------- */
-var drumBufs = {}, userSamples = {}, drumEditing = false;
+var drumBufs = {}, drumLoading = {}, userSamples = {}, drumEditing = false;
+var padGain = [], padVoices = [], padEls = [];
 function drumMeta(id) { return DRUM[id] || userSamples[id] || null; }
 function getDrumBuffer(id) {
   if (drumBufs[id]) return Promise.resolve(drumBufs[id]);
+  if (drumLoading[id]) return drumLoading[id];
+  if (!ctx) return Promise.resolve(null);
   var p;
   if (DRUM[id]) p = fetchBuf(DRUM[id].file);
   else if (userSamples[id]) p = idbGet(id).then(function (rec) { return decode(rec.data.slice(0)); });
   else return Promise.resolve(null);
-  return p.then(function (b) { drumBufs[id] = b; return b; }, function () { return null; });
+  drumLoading[id] = p.then(function (b) { drumBufs[id] = b; delete drumLoading[id]; return b; }, function () { delete drumLoading[id]; return null; });
+  return drumLoading[id];
 }
 function preloadKit() { S.kit.forEach(function (id) { getDrumBuffer(id); }); }
-function trigger(i, buf, vel) {
+function padOut(i) {
+  if (!padGain[i]) { padGain[i] = ctx.createGain(); padGain[i].connect(A.drumBus); }
+  padGain[i].gain.value = S.dvol[i] == null ? 1 : S.dvol[i];
+  return padGain[i];
+}
+function trigger(i, buf, vel, when) {
+  var t = when || ctx.currentTime;
   var src = ctx.createBufferSource(); src.buffer = buf;
-  var g = ctx.createGain(); g.gain.value = clamp(vel, 0.05, 1) * (S.dvol[i] == null ? 1 : S.dvol[i]);
-  src.connect(g); g.connect(A.drumBus); src.start();
-  var p = $('#drumGrid').children[i];
-  if (p) { p.classList.add('hit'); setTimeout(function () { p.classList.remove('hit'); }, 90); }
+  var g = ctx.createGain(); g.gain.value = clamp(vel, 0.05, 1);
+  src.connect(g); g.connect(padOut(i)); src.start(t);
+  // no máximo 3 vozes por pad: a mais antiga some rápido (evita acúmulo em pratos e repiques)
+  var vs = padVoices[i] || (padVoices[i] = []);
+  vs.push({ s: src, g: g });
+  src.onended = function () { var k = vs.indexOf(this._v); if (k >= 0) vs.splice(k, 1); try { g.disconnect(); } catch (e) {} };
+  src._v = vs[vs.length - 1];
+  while (vs.length > 3) { var o = vs.shift(); try { o.g.gain.setTargetAtTime(0, t, 0.015); o.s.stop(t + 0.08); } catch (e) {} }
+  if (!when) flashPad(i);
+}
+function flashPad(i) {
+  var p = padEls[i]; if (!p) return;
+  p.classList.remove('hit'); void p.offsetWidth; p.classList.add('hit');
 }
 function playDrum(i, vel) {
   if (!ctx) return;
@@ -332,18 +389,27 @@ function playDrum(i, vel) {
   if (b) trigger(i, b, v);
   else getDrumBuffer(id).then(function (bb) { if (bb) trigger(i, bb, v); });
 }
+var kitSelKey = null;
 function renderDrums() {
-  var g = $('#drumGrid'); g.innerHTML = '';
+  var g = $('#drumGrid');
+  if (!padEls.length) {
+    for (var n = 0; n < 16; n++) {
+      var p = el('div', 'dpad'); p.dataset.action = 'drum:' + n; p.dataset.fast = '1';
+      p.appendChild(el('b', null, String(n + 1))); p.appendChild(el('span'));
+      p.addEventListener('animationend', function () { this.classList.remove('hit'); });
+      g.appendChild(p); padEls.push(p);
+    }
+  }
   S.kit.forEach(function (id, i) {
-    var m = drumMeta(id);
-    var p = el('div', 'dpad'); p.dataset.action = 'drum:' + i; p.dataset.fast = '1';
-    p.appendChild(el('b', null, String(i + 1)));
-    p.appendChild(el('span', null, kitLabel(i) || (m ? m.name : '(vazio)')));
-    g.appendChild(p);
+    var m = drumMeta(id), p = padEls[i];
+    p.lastChild.textContent = kitLabel(i) || (m ? m.name : 'Vazio');
+    p.classList.toggle('empty', !id);
   });
   $('#tab-drums').classList.toggle('editing', drumEditing);
   g.classList.toggle('has16', S.kit.slice(8).some(Boolean));
   renderDvols(); renderStatus();
+  var key = kitList().join('|') + '#' + S.kitSel;
+  if (key === kitSelKey) return; kitSelKey = key;
   var sel = $('#kitSel'); sel.innerHTML = '';
   var g1 = document.createElement('optgroup'); g1.label = 'Kits prontos';
   FACTORY_KITS.forEach(function (k) { var o = el('option', null, k.name); o.value = 'f:' + k.name; g1.appendChild(o); });
@@ -363,20 +429,29 @@ function kitLabel(i) {
   if (v && v[0] === 'f') FACTORY_KITS.forEach(function (k) { if (k.name === v.slice(2) && k.ids[i] === S.kit[i] && k.labels) r = k.labels[i] || null; });
   return r;
 }
+/* mixer da bateria: um fader vertical por peça, todos na mesma tela */
 function renderDvols() {
   var box = $('#dvols'); if (!box) return; box.innerHTML = '';
   S.kit.forEach(function (id, i) {
     if (!id) return;
-    var m = drumMeta(id);
-    var w = el('div', 'dv');
-    var top = el('div', 'dvt'); top.appendChild(el('b', null, kitLabel(i) || (m ? m.name : id)));
-    var o = el('output', null, Math.round(S.dvol[i] * 100) + '%'); top.appendChild(o);
-    var r = document.createElement('input'); r.type = 'range'; r.min = 0; r.max = 1; r.step = 0.01; r.value = S.dvol[i];
-    r.setAttribute('aria-label', 'Volume ' + (m ? m.name : 'pad ' + (i + 1)));
-    r.oninput = function () { S.dvol[i] = parseFloat(r.value); o.textContent = Math.round(S.dvol[i] * 100) + '%'; save(); };
-    w.appendChild(top); w.appendChild(r); box.appendChild(w);
+    var m = drumMeta(id), name = kitLabel(i) || (m ? m.name : id);
+    var col = el('div', 'vcol');
+    var o = el('b', 'vv', Math.round(S.dvol[i] * 100) + '');
+    var f = el('div', 'vf'); f.tabIndex = 0; f.setAttribute('role', 'slider'); f.setAttribute('aria-label', 'Volume ' + name);
+    f.innerHTML = '<i class="trk"><i class="fill"></i></i><i class="thumb"></i>';
+    var nm = el('button', 'vname', name); nm.title = 'Tocar ' + name; nm.dataset.action = 'drum:' + i; nm.dataset.fast = '1';
+    col.appendChild(o); col.appendChild(f); col.appendChild(nm); box.appendChild(col);
+    function draw() { f.style.setProperty('--v', S.dvol[i]); o.textContent = Math.round(S.dvol[i] * 100); }
+    function setv(v) { S.dvol[i] = clamp(v, 0, 1); draw(); if (padGain[i]) padGain[i].gain.value = S.dvol[i]; save(); }
+    var on = false, trk = f.firstChild;
+    function fy(e) { var r = trk.getBoundingClientRect(); setv(1 - (e.clientY - r.top) / r.height); }
+    f.addEventListener('pointerdown', function (e) { on = true; f.setPointerCapture(e.pointerId); fy(e); e.preventDefault(); });
+    f.addEventListener('pointermove', function (e) { if (on) fy(e); });
+    f.addEventListener('pointerup', function () { on = false; }); f.addEventListener('pointercancel', function () { on = false; });
+    f.addEventListener('keydown', function (e) { var d = e.key === 'ArrowUp' ? 0.05 : e.key === 'ArrowDown' ? -0.05 : 0; if (d) { e.preventDefault(); setv(S.dvol[i] + d); } });
+    draw();
   });
-  box.classList.toggle('hidden', !box.children.length);
+  fitGrid(box, 46, 120, true);
 }
 function kitList() {
   return FACTORY_KITS.map(function (k) { return 'f:' + k.name; }).concat(Object.keys(S.drumSets).map(function (n) { return 'u:' + n; }));
@@ -538,10 +613,8 @@ function loopSteps(beatT, beat, spb) {
     Object.keys(P).forEach(function (slot) {
       var c = P[slot].charAt((beat * per + k) % P[slot].length), v = parseInt(c, 10); if (!v) return;
       var buf = drumBufs[S.kit[slot]]; if (!buf) { getDrumBuffer(S.kit[slot]); return; }
-      var src = ctx.createBufferSource(); src.buffer = buf;
-      var g = ctx.createGain(), hum = 1 + (Math.random() - 0.5) * (slot === '2' ? 0.16 : 0.06);
-      g.gain.value = clamp(v / 9 * hum, 0.05, 1) * (S.dvol[slot] == null ? 1 : S.dvol[slot]) * S.loopVol;
-      src.connect(g); g.connect(A.drumBus); src.start(t);
+      var hum = 1 + (Math.random() - 0.5) * (slot === '2' ? 0.16 : 0.06);
+      trigger(+slot, buf, clamp(v / 9 * hum, 0.05, 1) * S.loopVol, t);
     });
   }
 }
@@ -591,12 +664,12 @@ function metStart() {
   if (!ctx || metOn) return;
   metOn = true; metBeat = 0; metNext = ctx.currentTime + 0.08; beatQueue = [];
   metTick(); metTimer = setInterval(metTick, 25); requestAnimationFrame(beatDraw);
-  $('#metToggle').textContent = '■ Parar'; $('#metToggle').classList.add('on');
+  $('#metToggle').innerHTML = svgUse('i-stop') + '<span>Parar</span>'; $('#metToggle').classList.add('playing');
 }
 function metStop() {
   metOn = false; clearInterval(metTimer); beatQueue = [];
   $$('#beats .beat').forEach(function (d) { d.classList.remove('on'); });
-  $('#metToggle').textContent = '▶ Iniciar'; $('#metToggle').classList.remove('on');
+  $('#metToggle').innerHTML = svgUse('i-play') + '<span>Iniciar</span>'; $('#metToggle').classList.remove('playing');
 }
 function applyPulse() {
   if (!ctx || !A.pLfo) return;
@@ -607,7 +680,7 @@ function applyPulse() {
 function swellSecs() { return S.swell > 0 ? S.swell * 4 * 60 / S.bpm : 0; }
 function setBpm(v) {
   v = clamp(Math.round(v), 30, 260); S.bpm = v;
-  $('#bpm').value = v; $('#bpmRange').value = v; save(); applyPulse();
+  $('#bpm').value = v; $('#bpmRange').value = v; save(); applyPulse(); renderOled();
 }
 var taps = [];
 function tapTempo() {
@@ -640,10 +713,7 @@ function bindMetro() {
 
 /* ---------- setlist ---------- */
 function songLabel(s) { return LABEL[s.key] + ' · ' + s.bpm + ' bpm · ' + (FAM[s.family] ? FAM[s.family].name : s.family); }
-function renderSongNow() {
-  var s = S.setlist[S.songIdx];
-  $('#songNow').textContent = s ? s.title + ' — ' + songLabel(s) : '—';
-}
+function renderSongNow() { renderOled(); }
 function renderSongs() {
   var ol = $('#songs'); ol.innerHTML = '';
   if (!S.setlist.length) { ol.appendChild(el('p', 'muted', 'Nenhuma música ainda. Ajuste tom, pad e andamento e use "Salvar estado atual".')); }
@@ -909,16 +979,22 @@ function bindSafety() {
     if (unlocked) return; unlocked = true;
     try { var b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource(); s.buffer = b; s.connect(ctx.destination); s.start(0); } catch (e) {}
     try {
-      var au = document.createElement('audio'); au.setAttribute('playsinline', ''); au.loop = true; au.volume = 0.01;
-      au.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=';
+      // meio segundo de silêncio de verdade, tocado uma vez (iPhone: libera o som mesmo no modo silencioso)
+      var sr = 8000, len = 4000, buf = new ArrayBuffer(44 + len * 2), dv = new DataView(buf);
+      function w(o, s) { for (var i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); }
+      w(0, 'RIFF'); dv.setUint32(4, 36 + len * 2, true); w(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+      dv.setUint32(24, sr, true); dv.setUint32(28, sr * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, len * 2, true);
+      var au = document.createElement('audio'); au.setAttribute('playsinline', ''); au.src = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
       var pr = au.play(); if (pr && pr.catch) pr.catch(function () {});
+      au.onended = function () { URL.revokeObjectURL(au.src); au.removeAttribute('src'); };
     } catch (e) {}
     setTimeout(function () { if (ctx.state !== 'running') { unlocked = false; toast('Sem som? Toque de novo na tela e verifique o volume e o modo silencioso do celular.'); } }, 1200);
   }
   ['pointerdown', 'touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, unlock, true); });
   // tela sempre ligada enquanto o app está aberto
   var wl = null;
-  function wake() { try { if (navigator.wakeLock && !document.hidden && !wl) navigator.wakeLock.request('screen').then(function (l) { wl = l; l.addEventListener('release', function () { wl = null; }); }, function () {}); } catch (e) {} }
+  var wlBusy = false;
+  function wake() { try { if (navigator.wakeLock && !document.hidden && !wl && !wlBusy) { wlBusy = true; navigator.wakeLock.request('screen').then(function (l) { wl = l; wlBusy = false; l.addEventListener('release', function () { wl = null; }); }, function () { setTimeout(function () { wlBusy = false; }, 5000); }); } } catch (e) {} }
   document.addEventListener('visibilitychange', wake); document.addEventListener('pointerdown', wake, true); wake();
   // travar toques: segurar 1,5 s para destravar
   var lk = $('#lockLayer'), tm = null, hold = $('#lockHold');
@@ -930,6 +1006,7 @@ function bindSafety() {
 }
 
 /* ---------- eventos gerais ---------- */
+function refit() { requestAnimationFrame(function () { fitGrid($('#fams'), 128, 40); fitGrid($('#dvols'), 46, 120, true); }); }
 function bindUI() {
   // abas
   $$('#tabs button').forEach(function (b) {
@@ -941,13 +1018,15 @@ function bindUI() {
       $$('.tab').forEach(function (t) {
         t.classList.toggle('on', live ? (t.id === 'tab-pads' || t.id === 'tab-drums') : t.id === 'tab-' + b.dataset.tab);
       });
+      refit();
     };
   });
-  $$('.stseg.sv').forEach(function (g) {
+  $$('.seg.sv').forEach(function (g) {
     g.onclick = function (e) {
       var b = e.target.closest('button'); if (!b) return;
       $$('button', g).forEach(function (x) { x.classList.toggle('on', x === b); });
       g.closest('.tab').dataset.sv = b.dataset.sv;
+      refit();
     };
   });
   (function () { var b = $('#tabs button.on'); if (b) b.onclick(); })();
@@ -1025,7 +1104,7 @@ function boot() {
     renderDrums();
     // áudio pronto desde a abertura (fica suspenso até o primeiro toque, regra do navegador)
     initAudio();
-    loadClicks(); preloadKit(); prefetchFamily(S.family); initMidi();
+    loadClicks(); preloadKit(); prefetchFamily(S.family); initMidi(); refit();
   }).catch(function (e) { toast('Erro ao carregar o catálogo'); console.error(e); });
 }
 window.AuraPad = { get ctx() { return ctx; }, get A() { return A; }, S: S, save: save, toast: toast };
