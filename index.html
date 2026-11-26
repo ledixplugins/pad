@@ -75,7 +75,7 @@
     <span class="txt"><b id="oledMain">TOM C · SHIMMER</b><span id="oledSub">Nenhuma música carregada</span></span>
   </button>
   <div class="hdr-right">
-    <label class="master"><span>Master</span><input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.9"></label>
+    <label class="master" data-action="vol:master"><span>Master</span><input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.9"></label>
     <button id="btnLock" class="hw icon" title="Travar a tela" aria-label="Travar a tela"><svg><use href="#i-lock"/></svg></button>
     <button id="btnPanic" class="hw panic" title="Parar tudo"><i></i>Pânico</button>
   </div>
@@ -327,7 +327,8 @@
     <div class="sec-t">Conexão</div>
     <div id="midiStatus" class="lcdline">Verificando MIDI…</div>
     <small id="midiLast" class="lcdline dim">Última mensagem: nenhuma ainda</small>
-    <small class="muted">Funciona com controladores USB e Bluetooth no Chrome e no Edge (computador e Android). O Safari do iPad não oferece Web MIDI.</small>
+    <small class="muted compat">Funciona com controladores USB e Bluetooth no Chrome e no Edge (computador e Android). O Safari do iPad não oferece Web MIDI.</small>
+    <div class="row volmap"><span class="vm-t">Volumes (fader ou knob)</span><button class="hw" data-action="vol:master" title="Para mapear: ative Mapear controles, toque aqui e mova o fader ou knob"><svg><use href="#i-link"/></svg>Volume master</button><button class="hw" data-action="vol:pad">Volume do pad</button><button class="hw" data-action="vol:drum">Volume da bateria</button></div>
     <small class="muted about">AURA Pad · criado por Thiago R. Galvão · © 2026 · Todos os direitos reservados</small>
   </div>
   <div class="panel sec" data-v="ctl">

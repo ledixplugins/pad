@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.0.3",
+    "date": "2026-11-26",
+    "titulo": "Volumes pelo controlador MIDI",
+    "itens": [
+      "Agora dá para mapear o volume master do AURA Pad a um fader ou knob do seu controlador MIDI. Na aba MIDI, ative Mapear controles, toque em Volume master e mova o fader.",
+      "O mesmo vale para o volume do pad e o da bateria.",
+      "O volume acompanha o fader em tempo real, inclusive até o zero."
+    ]
+  },
+  {
     "version": "1.0.2",
     "date": "2026-11-26",
     "titulo": "Novo ícone",

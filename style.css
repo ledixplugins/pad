@@ -661,3 +661,7 @@ body.learn [data-action]{outline:2px dashed var(--amber);outline-offset:2px}
   body > :not(#rotate):not(svg){visibility:hidden}
 }
 @keyframes rot{0%,20%{transform:rotate(0)}50%,80%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+
+/* MIDI: botões para mapear volumes contínuos (fader ou knob) */
+.volmap{flex-wrap:wrap;gap:6px;align-items:center}.volmap .vm-t{flex:1 0 100%;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+@media (orientation:landscape) and (max-height:500px){.volmap{gap:4px}.volmap .vm-t{display:none}.volmap .hw{padding:6px 8px;min-height:32px;font-size:11px}.volmap .hw svg{display:none}#tab-midi .compat{display:none}}

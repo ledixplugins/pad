@@ -852,6 +852,7 @@ function bindSets() {
 /* ---------- ações (UI + MIDI) ---------- */
 function doAction(a, vel) {
   var p = a.split(':');
+  if (p[0] === 'vol') return;                      // volumes são controles contínuos (fader/knob): ver setVol
   if (p[0] === 'drum') playDrum(parseInt(p[1], 10), vel);
   else if (p[0] === 'padkey') padKeyTap(p[1]);
   else if (a === 'pad:toggle') padToggle();
@@ -875,10 +876,24 @@ function actionName(a) {
   var p = a.split(':');
   if (p[0] === 'drum') return 'Drum pad ' + (parseInt(p[1], 10) + 1);
   if (p[0] === 'padkey') return 'Pad tom ' + LABEL[p[1]];
-  return { 'pad:toggle': 'Pad tocar/parar', 'pad:duck': 'Pad abaixar (voz)', 'loop:toggle': 'Bateria em loop ligar/desligar', 'loop:next': 'Próximo ritmo de bateria', 'key:1': 'Subir 1 semitom', 'key:-1': 'Descer 1 semitom', 'key:2': 'Subir 1 tom', 'key:-2': 'Descer 1 tom', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior' }[a] || a;
+  return { 'pad:toggle': 'Pad tocar/parar', 'pad:duck': 'Pad abaixar (voz)', 'loop:toggle': 'Bateria em loop ligar/desligar', 'loop:next': 'Próximo ritmo de bateria', 'key:1': 'Subir 1 semitom', 'key:-1': 'Descer 1 semitom', 'key:2': 'Subir 1 tom', 'key:-2': 'Descer 1 tom', 'met:toggle': 'Metrônomo iniciar/parar', 'met:tap': 'Tap tempo', 'song:next': 'Próxima música', 'song:prev': 'Música anterior', 'fam:next': 'Próximo pad', 'fam:prev': 'Pad anterior', 'kit:next': 'Próximo kit de bateria', 'kit:prev': 'Kit de bateria anterior', 'vol:master': 'Volume master (fader ou knob)', 'vol:pad': 'Volume do pad (fader ou knob)', 'vol:drum': 'Volume da bateria (fader ou knob)' }[a] || a;
 }
 
 /* ---------- MIDI ---------- */
+// Controles contínuos: um CC (fader ou knob do controlador) move o volume. Aplica no máximo uma vez por quadro, para não sobrecarregar.
+var VOLS = { 'vol:master': 'masterVol', 'vol:pad': 'padVol', 'vol:drum': 'drumVol' }, volPend = {}, volRaf = 0;
+function setVol(a, x) {
+  volPend[a] = x;
+  if (volRaf) return;
+  volRaf = requestAnimationFrame(function () {
+    volRaf = 0;
+    Object.keys(volPend).forEach(function (k) {
+      var i = $('#' + VOLS[k]); if (!i) return;
+      i.value = Math.max(0, Math.min(1, volPend[k])); i.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    volPend = {};
+  });
+}
 var learn = false, armed = null, midiAccess = null;
 function defaultMap() {
   var m = {};
@@ -911,6 +926,8 @@ function onMidi(e) {
   if (st === 0x90 && v > 0) { key = 'note:' + n; on = true; }
   else if (st === 0xb0) { key = 'cc:' + n; on = v > 0; }
   else return;
+  if (armed && armed.indexOf('vol:') === 0 && st !== 0xb0) return;     // volume só aceita CC (fader ou knob)
+  if (!armed && st === 0xb0) { var av = effMap()[key]; if (av && av.indexOf('vol:') === 0) { setVol(av, v / 127); return; } }   // vale também com o fader em 0
   if (!on) return;
   if (armed) { // modo mapear
     Object.keys(S.midiMap).forEach(function (k) { if (S.midiMap[k] === armed) delete S.midiMap[k]; });
@@ -942,7 +959,7 @@ function bindMidi() {
     var t = e.target.closest && e.target.closest('[data-action]');
     if (!t) return;
     e.preventDefault(); e.stopPropagation();
-    if (e.type === 'pointerdown') { armed = t.dataset.action; $('#midiHint').textContent = 'Aguardando MIDI para: ' + actionName(armed); }
+    if (e.type === 'pointerdown') { armed = t.dataset.action; $('#midiHint').textContent = (armed.indexOf('vol:') === 0 ? 'Mova o fader ou o knob do controlador para: ' : 'Aguardando MIDI para: ') + actionName(armed); }
   }
   document.addEventListener('pointerdown', capture, true);
   document.addEventListener('click', capture, true);
