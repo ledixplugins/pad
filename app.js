@@ -226,10 +226,14 @@ function padStop(fade) {
   if (padStream2) { padStream2.stop(f); padStream2 = null; }
   renderKeys(); renderPadBtn();
 }
+var lastKeyTap = { n: '', t: 0 };
 function padKeyTap(note) {
+  var tn = performance.now(); if (lastKeyTap.n === note && tn - lastKeyTap.t < 30) return;   // toque duplicado (rebote) não liga e desliga na hora
+  lastKeyTap = { n: note, t: tn };
   S.key = note; save();
-  if (!padOn) padStart();
-  else if (note === padNote) padStop();
+  if (padLoadingNote === note && !padOn) padStop();   // tocou de novo enquanto ainda carregava: cancela, em vez de iniciar outro
+  else if (!padOn) padStart();
+  else if (note === padNote || padLoadingNote === note) padStop();
   else padStart();
   renderKeys();
 }
@@ -942,7 +946,12 @@ function renderMidiMap() {
     right.appendChild(x); row.appendChild(right); box.appendChild(row);
   });
 }
+var lastMsg = { s: '', t: 0, src: null };
 function onMidi(e) {
+  // o mesmo controlador pode aparecer em duas portas MIDI e mandar cada mensagem duas vezes: ignora a cópia (outra porta, mesmos bytes, em até 20 ms)
+  var sig = e.data[0] + ',' + e.data[1] + ',' + e.data[2], now = performance.now(), src = e.target || null;
+  if (sig === lastMsg.s && src && lastMsg.src && src !== lastMsg.src && now - lastMsg.t < 20) return;
+  lastMsg = { s: sig, t: now, src: src };
   if (!armed && window.StageLab && StageLab.midi(e)) return;
   var d = e.data, st = d[0] & 0xf0, n = d[1], v = d[2];
   var ml = $('#midiLast'); if (ml && d[0] < 0xf0) ml.textContent = 'Última mensagem: ' + ({ 0x90: 'Nota ligada', 0x80: 'Nota desligada', 0xb0: 'CC', 0xc0: 'Program Change', 0xe0: 'Pitch bend', 0xd0: 'Aftertouch', 0xa0: 'Aftertouch de tecla' }[st] || 'MIDI') + ' ' + n + (d.length > 2 ? ' · valor ' + v : '') + ' · canal ' + ((d[0] & 15) + 1);

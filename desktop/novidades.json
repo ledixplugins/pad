@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.0.7",
+    "date": "2026-11-26",
+    "titulo": "Pad pelo teclado MIDI para quando toca de novo",
+    "itens": [
+      "Tocar de novo a mesma tecla mapeada agora sempre para o pad, mesmo se o toque vier rápido ou enquanto o pad ainda está carregando.",
+      "Se o controlador aparecer em duas portas MIDI e mandar cada nota duas vezes, a cópia é ignorada."
+    ]
+  },
+  {
     "version": "1.0.6",
     "date": "2026-11-26",
     "titulo": "Usar o controlador com o AURA Synth",
