@@ -5,7 +5,8 @@
     "titulo": "Pad pelo teclado MIDI para quando toca de novo",
     "itens": [
       "Tocar de novo a mesma tecla mapeada agora sempre para o pad, mesmo se o toque vier rápido ou enquanto o pad ainda está carregando.",
-      "Se o controlador aparecer em duas portas MIDI e mandar cada nota duas vezes, a cópia é ignorada."
+      "Se o controlador aparecer em duas portas MIDI e mandar cada nota duas vezes, a cópia é ignorada.",
+      "Os botões do Palco que ligam e desligam o controlador MIDI agora são um alto-falante: com som quando está ligado, cortado (vermelho) quando está silenciado."
     ]
   },
   {

@@ -28,6 +28,8 @@
     <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
     <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-snd" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></symbol>
     <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
     <symbol id="i-loop" viewBox="0 0 24 24"><ellipse cx="12" cy="8" rx="8" ry="3"/><path d="M4 8v8c0 1.7 3.6 3 8 3s8-1.3 8-3V8"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
@@ -106,7 +108,7 @@
         <button id="famPrev" class="hw icon" data-action="fam:prev" aria-label="Pad anterior"><svg><use href="#i-prev"/></svg></button>
         <div class="stepname"><small>Pad</small><select id="famSel" aria-label="Pad"></select></div>
         <button id="famNext" class="hw icon" data-action="fam:next" aria-label="Próximo pad"><svg><use href="#i-next"/></svg></button>
-        <button class="hw midigate on" data-action="midi:pads" title="Controlador MIDI toca os pads: ligado. Toque para desligar (use com o AURA Synth)" aria-label="Controlador MIDI nos pads">MIDI</button>
+        <button class="hw icon midigate on" data-action="midi:pads" title="Controlador MIDI toca os pads: ligado. Toque para desligar (use com o AURA Synth)" aria-label="Controlador MIDI nos pads"><svg><use href="#i-snd"/></svg></button>
       </div>
       <div id="keys" class="keys"></div>
       <div class="status" id="status">
@@ -194,7 +196,7 @@
     <button id="kitPrev" class="hw icon" data-action="kit:prev" aria-label="Kit anterior"><svg><use href="#i-prev"/></svg></button>
     <div class="stepname"><small>Drum kit</small><select id="kitSel" aria-label="Kit de bateria"></select></div>
     <button id="kitNext" class="hw icon" data-action="kit:next" aria-label="Próximo kit"><svg><use href="#i-next"/></svg></button>
-    <button class="hw midigate on" data-action="midi:drums" title="Controlador MIDI toca a bateria: ligado. Toque para desligar (use com o AURA Synth)" aria-label="Controlador MIDI na bateria">MIDI</button>
+    <button class="hw icon midigate on" data-action="midi:drums" title="Controlador MIDI toca a bateria: ligado. Toque para desligar (use com o AURA Synth)" aria-label="Controlador MIDI na bateria"><svg><use href="#i-snd"/></svg></button>
   </div>
   <div id="drumGrid" class="drum-grid"></div>
   <div class="d-mix panel">

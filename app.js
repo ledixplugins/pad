@@ -881,7 +881,7 @@ function doAction(a, vel) {
 function midiGateUI() {
   [['midi:pads', 'midiPadOff', 'pads'], ['midi:drums', 'midiDrumOff', 'bateria']].forEach(function (x) {
     $$('[data-action="' + x[0] + '"]').forEach(function (b) {
-      b.classList.toggle('on', !S[x[1]]); b.setAttribute('aria-pressed', S[x[1]] ? 'false' : 'true');
+      b.classList.toggle('on', !S[x[1]]); var u = b.querySelector('use'); if (u) u.setAttribute('href', S[x[1]] ? '#i-mute' : '#i-snd'); b.setAttribute('aria-pressed', S[x[1]] ? 'false' : 'true');
       b.title = 'Controlador MIDI toca ' + (x[2] === 'pads' ? 'os pads' : 'a bateria') + ': ' + (S[x[1]] ? 'desligado' : 'ligado') + '. Toque para ' + (S[x[1]] ? 'ligar' : 'desligar') + ' (use com o AURA Synth)';
     });
   });
